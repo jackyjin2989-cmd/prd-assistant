@@ -7,7 +7,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / ".trae" / "skills"
 REQUIRED = {
-    "prd-assistant": ["references/review-checklist.md"],
+    "prd-assistant": [
+        "review-checklist.md",
+        "写法指南.md",
+        "图片嵌入与截图指南.md",
+        "语言表述规范.md",
+    ],
     "html-prototype": [
         "references/site-reference.md",
         "references/visual-validation.md",
