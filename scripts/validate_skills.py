@@ -54,6 +54,29 @@ PRD_POLICY_MARKERS = [
 README_POLICY_MARKERS = [
     "聚焦核心产品功能与改动",
     "观察和原型均不是 PRD 的默认步骤",
+    "图片指南的职责边界与关键规则",
+]
+IMAGE_GUIDE_REQUIRED_MARKERS = [
+    "## 图片选择",
+    "## 命名",
+    "## 脱敏",
+    "## 相对路径与存在性",
+    "## 图片排布",
+    "每张截图必须紧跟对应描述或对应小标题",
+    "禁止把各模块截图统一堆到章节末尾或文档末尾",
+    "需要制作或验证 HTML 原型时调用 `html-prototype`",
+]
+IMAGE_GUIDE_FORBIDDEN_MARKERS = [
+    "Selenium",
+    "截图脚本",
+    "## 远程同步",
+    "同步到远程",
+    "截图索引",
+]
+PROTOTYPE_POLICY_MARKERS = [
+    "信息架构转译、页面实现、交互状态、响应式适配和视觉验证",
+    "自动截图只在原型交付且用户明确要求时按需执行",
+    "不交付或长期维护独立 Selenium 截图脚本 SOP",
 ]
 
 
@@ -121,6 +144,17 @@ def check_markers(path: Path, markers: list[str]) -> list[str]:
     ]
 
 
+def check_forbidden_markers(path: Path, markers: list[str]) -> list[str]:
+    if not path.is_file():
+        return [f"缺少策略文件 {path.relative_to(ROOT)}"]
+    text = path.read_text(encoding="utf-8")
+    return [
+        f"{path.relative_to(ROOT)}: 不应包含旧职责或 SOP -> {marker}"
+        for marker in markers
+        if marker in text
+    ]
+
+
 def main() -> int:
     errors: list[str] = []
     for name, references in REQUIRED.items():
@@ -128,6 +162,10 @@ def main() -> int:
 
     errors.extend(check_markers(ROOT / "prd-assistant" / "SKILL.md", PRD_POLICY_MARKERS))
     errors.extend(check_markers(ROOT / "README.md", README_POLICY_MARKERS))
+    image_guide = ROOT / "prd-assistant" / "references" / "图片嵌入与截图指南.md"
+    errors.extend(check_markers(image_guide, IMAGE_GUIDE_REQUIRED_MARKERS))
+    errors.extend(check_forbidden_markers(image_guide, IMAGE_GUIDE_FORBIDDEN_MARKERS))
+    errors.extend(check_markers(ROOT / "html-prototype" / "SKILL.md", PROTOTYPE_POLICY_MARKERS))
 
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".git" in path.parts or path.name == "validate_skills.py":
@@ -148,8 +186,9 @@ def main() -> int:
         return 1
 
     print(
-        f"验证通过：{len(REQUIRED)} 个技能，结构、Markdown 链接、敏感模式、"
-        "PRD 内容边界与低成本分流规则均通过。"
+        f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、必需参考文件、"
+        "Markdown 普通链接、文本敏感模式、PRD 内容边界与观察/原型分流，以及图片指南"
+        "职责边界、必需规则、旧截图 SOP 清理和 html-prototype 自动截图条件。"
     )
     return 0
 
