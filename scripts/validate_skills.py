@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILLS = ROOT / ".trae" / "skills"
+SKILLS = ROOT
 REQUIRED = {
     "prd-assistant": [
         "references/input-intake.md",
