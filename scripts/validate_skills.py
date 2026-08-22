@@ -12,6 +12,7 @@ REQUIRED = {
         "写法指南.md",
         "图片嵌入与截图指南.md",
         "语言表述规范.md",
+        "final-output-hygiene.md",
     ],
     "html-prototype": [
         "references/site-reference.md",
