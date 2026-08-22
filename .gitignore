@@ -1,0 +1,36 @@
+# OS and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+cookies.json
+storage-state.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# JavaScript
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Generated prototype validation artifacts
+artifacts/
+screenshots/
+diffs/
+test-results/
+playwright-report/
