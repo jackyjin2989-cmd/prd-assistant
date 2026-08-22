@@ -50,11 +50,16 @@ PRD_POLICY_MARKERS = [
     "### 默认不调用 `browser-observer`",
     "### 默认不调用 `html-prototype`",
     "最终文档不用删除线",
+    "核心分歧集中提出最少问题并暂停定稿",
+    "待确认内容不得进入确定性验收",
+    "XX问题已判断",
 ]
 README_POLICY_MARKERS = [
     "聚焦核心产品功能与改动",
     "观察和原型均不是 PRD 的默认步骤",
     "图片指南的职责边界与关键规则",
+    "截图模糊、PC/H5 等不单独触发",
+    "核心分歧集中追问并暂停定稿",
 ]
 IMAGE_GUIDE_REQUIRED_MARKERS = [
     "## 图片选择",
@@ -73,10 +78,17 @@ IMAGE_GUIDE_FORBIDDEN_MARKERS = [
     "同步到远程",
     "截图索引",
 ]
+BROWSER_POLICY_MARKERS = [
+    "仅在满足以下任一条件时调用",
+    "URL、截图模糊或裁切、缺少普通交互状态、PC/H5 差异等均不单独触发观察",
+]
 PROTOTYPE_POLICY_MARKERS = [
     "信息架构转译、页面实现、交互状态、响应式适配和视觉验证",
     "自动截图只在原型交付且用户明确要求时按需执行",
     "不交付或长期维护独立 Selenium 截图脚本 SOP",
+    "确定最小范围",
+    "双端支持按需",
+    "完整状态矩阵不作为默认完成条件",
 ]
 
 
@@ -165,6 +177,7 @@ def main() -> int:
     image_guide = ROOT / "prd-assistant" / "references" / "图片嵌入与截图指南.md"
     errors.extend(check_markers(image_guide, IMAGE_GUIDE_REQUIRED_MARKERS))
     errors.extend(check_forbidden_markers(image_guide, IMAGE_GUIDE_FORBIDDEN_MARKERS))
+    errors.extend(check_markers(ROOT / "browser-observer" / "SKILL.md", BROWSER_POLICY_MARKERS))
     errors.extend(check_markers(ROOT / "html-prototype" / "SKILL.md", PROTOTYPE_POLICY_MARKERS))
 
     for path in ROOT.rglob("*"):
@@ -188,7 +201,7 @@ def main() -> int:
     print(
         f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、必需参考文件、"
         "Markdown 普通链接、文本敏感模式、PRD 内容边界与观察/原型分流，以及图片指南"
-        "职责边界、必需规则、旧截图 SOP 清理和 html-prototype 自动截图条件。"
+        "职责边界、最小追问闭环、browser-observer 收窄触发、html-prototype 最小范围与按需验证。"
     )
     return 0
 
