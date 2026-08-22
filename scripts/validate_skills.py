@@ -38,6 +38,24 @@ FORBIDDEN = [
 TEXT_SUFFIXES = {".md", ".txt", ".html", ".js", ".css", ".json", ".yml", ".yaml"}
 MARKDOWN_LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 
+PRD_POLICY_MARKERS = [
+    "## 默认内容边界",
+    "系统边界",
+    "超时、重试、异步",
+    "发布、灰度、监控、回滚",
+    "算法、模型和内部策略",
+    "缺陷修复过程",
+    "功能下线",
+    "运营后台操作手册",
+    "### 默认不调用 `browser-observer`",
+    "### 默认不调用 `html-prototype`",
+    "最终文档不用删除线",
+]
+README_POLICY_MARKERS = [
+    "聚焦核心产品功能与改动",
+    "观察和原型均不是 PRD 的默认步骤",
+]
+
 
 def parse_target(raw: str) -> str | None:
     target = raw.strip().split(maxsplit=1)[0].strip("<>")
@@ -92,10 +110,24 @@ def check_skill(name: str, references: list[str]) -> list[str]:
     return errors
 
 
+def check_markers(path: Path, markers: list[str]) -> list[str]:
+    if not path.is_file():
+        return [f"缺少策略文件 {path.relative_to(ROOT)}"]
+    text = path.read_text(encoding="utf-8")
+    return [
+        f"{path.relative_to(ROOT)}: 缺少策略标记 -> {marker}"
+        for marker in markers
+        if marker not in text
+    ]
+
+
 def main() -> int:
     errors: list[str] = []
     for name, references in REQUIRED.items():
         errors.extend(check_skill(name, references))
+
+    errors.extend(check_markers(ROOT / "prd-assistant" / "SKILL.md", PRD_POLICY_MARKERS))
+    errors.extend(check_markers(ROOT / "README.md", README_POLICY_MARKERS))
 
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".git" in path.parts or path.name == "validate_skills.py":
@@ -115,7 +147,10 @@ def main() -> int:
             print(f"- {error}")
         return 1
 
-    print(f"验证通过：{len(REQUIRED)} 个技能，结构、Markdown 链接与敏感模式检查均通过。")
+    print(
+        f"验证通过：{len(REQUIRED)} 个技能，结构、Markdown 链接、敏感模式、"
+        "PRD 内容边界与低成本分流规则均通过。"
+    )
     return 0
 
 
