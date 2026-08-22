@@ -8,14 +8,17 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / ".trae" / "skills"
 REQUIRED = {
     "prd-assistant": [
-        "review-checklist.md",
-        "写法指南.md",
-        "图片嵌入与截图指南.md",
-        "语言表述规范.md",
-        "final-output-hygiene.md",
+        "references/input-intake.md",
+        "references/写法指南.md",
+        "references/review-checklist.md",
+        "references/图片嵌入与截图指南.md",
+        "references/语言表述规范.md",
+        "references/final-output-hygiene.md",
     ],
     "html-prototype": [
+        "references/browser-observation.md",
         "references/site-reference.md",
+        "references/responsive-guide.md",
         "references/visual-validation.md",
     ],
 }
@@ -50,6 +53,13 @@ def check_skill(name: str, references: list[str]) -> list[str]:
     for relative in references:
         if not (folder / relative).is_file():
             errors.append(f"{name}: 缺少引用 {relative}")
+
+    # 检查 SKILL.md 中对 references/ 的相对链接是否有效
+    ref_links = re.findall(r"\]\((references/[^)]+\.md)\)", text)
+    for link in ref_links:
+        if not (folder / link).is_file():
+            errors.append(f"{name}: SKILL.md 中的链接无效 -> {link}")
+
     return errors
 
 
