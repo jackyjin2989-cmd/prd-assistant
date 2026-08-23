@@ -84,11 +84,23 @@ BROWSER_POLICY_MARKERS = [
 ]
 PROTOTYPE_POLICY_MARKERS = [
     "信息架构转译、页面实现、交互状态、响应式适配和视觉验证",
-    "自动截图只在原型交付且用户明确要求时按需执行",
     "不交付或长期维护独立 Selenium 截图脚本 SOP",
     "确定最小范围",
     "双端支持按需",
     "完整状态矩阵不作为默认完成条件",
+]
+RESPONSIVE_FORBIDDEN_MARKERS = [
+    "原型必须同时支持 PC 和 H5",
+    "核心功能在两个端都可用",
+    "PC 和 H5 两端必须保持",
+]
+VISUAL_FORBIDDEN_MARKERS = [
+    "建议矩阵",
+    "最小状态",
+]
+RUNTIME_BASE = ROOT.parent / ".trae" / "skills"
+PRD_WRITING_REQUIRED_MARKERS = [
+    "成功判定（按需）",
 ]
 
 
@@ -180,6 +192,13 @@ def main() -> int:
     errors.extend(check_markers(ROOT / "browser-observer" / "SKILL.md", BROWSER_POLICY_MARKERS))
     errors.extend(check_markers(ROOT / "html-prototype" / "SKILL.md", PROTOTYPE_POLICY_MARKERS))
 
+    responsive_guide = ROOT / "html-prototype" / "references" / "responsive-guide.md"
+    errors.extend(check_forbidden_markers(responsive_guide, RESPONSIVE_FORBIDDEN_MARKERS))
+    visual_validation = ROOT / "html-prototype" / "references" / "visual-validation.md"
+    errors.extend(check_forbidden_markers(visual_validation, VISUAL_FORBIDDEN_MARKERS))
+    writing_guide = ROOT / "prd-assistant" / "references" / "写法指南.md"
+    errors.extend(check_markers(writing_guide, PRD_WRITING_REQUIRED_MARKERS))
+
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".git" in path.parts or path.name == "validate_skills.py":
             continue
@@ -192,6 +211,25 @@ def main() -> int:
             if re.search(pattern, text):
                 errors.append(f"{path.relative_to(ROOT)} 命中禁止模式: {pattern}")
 
+    if RUNTIME_BASE.is_dir():
+        for skill_name, refs in REQUIRED.items():
+            runtime_skill = RUNTIME_BASE / skill_name
+            if not runtime_skill.is_dir():
+                continue
+            runtime_skill_file = runtime_skill / "SKILL.md"
+            repo_skill_file = ROOT / skill_name / "SKILL.md"
+            if runtime_skill_file.is_file() and repo_skill_file.is_file():
+                if (runtime_skill_file.read_bytes()) != (repo_skill_file.read_bytes()):
+                    errors.append(f"运行版 {skill_name}/SKILL.md 与仓库版不一致")
+            for ref in refs:
+                runtime_ref = runtime_skill / ref
+                repo_ref = ROOT / skill_name / ref
+                if runtime_ref.is_file() and repo_ref.is_file():
+                    if runtime_ref.read_bytes() != repo_ref.read_bytes():
+                        errors.append(f"运行版 {skill_name}/{ref} 与仓库版不一致")
+                elif not runtime_ref.is_file() and repo_ref.is_file():
+                    errors.append(f"运行版缺少 {skill_name}/{ref}")
+
     if errors:
         print("验证失败：")
         for error in errors:
@@ -200,8 +238,10 @@ def main() -> int:
 
     print(
         f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、必需参考文件、"
-        "Markdown 普通链接、文本敏感模式、PRD 内容边界与观察/原型分流，以及图片指南"
-        "职责边界、最小追问闭环、browser-observer 收窄触发、html-prototype 最小范围与按需验证。"
+        "非图片 Markdown 链接（图片目标未检查）、基础敏感文本模式、PRD 内容边界与观察/原型分流，"
+        "图片指南职责边界、最小追问闭环、browser-observer 收窄触发、html-prototype 最小范围与按需验证，"
+        "responsive-guide 与 visual-validation 无强制双端残留，写法指南含成功判定规则；"
+        "并核对了运行版文件一致性。"
     )
     return 0
 
