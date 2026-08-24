@@ -77,10 +77,15 @@ IMAGE_GUIDE_FORBIDDEN_MARKERS = [
     "截图索引",
 ]
 BROWSER_POLICY_MARKERS = [
-    "仅在满足以下任一条件时调用",
+    "的“原型与观察分流”为唯一完整定义",
     "URL、截图模糊或裁切、缺少普通交互状态、PC/H5 差异等均不单独触发观察",
 ]
+
+INTAKE_POLICY_MARKERS = [
+    "的“冲突处理”为唯一完整定义",
+]
 PROTOTYPE_POLICY_MARKERS = [
+    "的“原型与观察分流”为唯一完整定义",
     "信息架构转译、页面实现、交互状态、响应式适配和视觉验证",
     "不交付或长期维护独立 Selenium 截图脚本 SOP",
     "确定最小范围",
@@ -190,6 +195,7 @@ def main() -> int:
     errors.extend(check_forbidden_markers(image_guide, IMAGE_GUIDE_FORBIDDEN_MARKERS))
     errors.extend(check_markers(prd_root / "references" / "browser" / "observation.md", BROWSER_POLICY_MARKERS))
     errors.extend(check_markers(prd_root / "references" / "prototype" / "generation.md", PROTOTYPE_POLICY_MARKERS))
+    errors.extend(check_markers(prd_root / "references" / "input-intake.md", INTAKE_POLICY_MARKERS))
 
     responsive_guide = prd_root / "references" / "prototype" / "responsive-guide.md"
     errors.extend(check_forbidden_markers(responsive_guide, RESPONSIVE_FORBIDDEN_MARKERS))
