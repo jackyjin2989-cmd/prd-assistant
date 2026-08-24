@@ -31,17 +31,17 @@
 
 ### 安装
 
-将 `prd-assistant` 目录复制到宿主约定的技能目录，保留 `SKILL.md` 与 `references/` 结构即可。以 TRAE 仓库级安装为例：
+将 `prd-assistant` 目录复制到宿主约定的技能目录，保留 `SKILL.md` 与 `references/` 结构即可：
 
 ```powershell
 git clone https://github.com/jackyjin2989-cmd/prd-assistant.git
-Copy-Item -Recurse prd-assistant\prd-assistant .trae\skills\prd-assistant
+Copy-Item -Recurse prd-assistant\prd-assistant <宿主技能目录>\prd-assistant
 ```
 
 安装后的结构：
 
 ```text
-.trae/skills/prd-assistant/
+<宿主技能目录>/prd-assistant/
 ├── SKILL.md
 └── references/
     ├── browser/      # 页面观察规则
