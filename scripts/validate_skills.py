@@ -8,13 +8,6 @@ from urllib.parse import unquote
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT
 REQUIRED = {
-    "browser-observer": [
-        "references/tool-adapter.md",
-        "references/snapshot-and-interaction.md",
-        "references/auth-and-sessions.md",
-        "references/evidence-and-diagnostics.md",
-        "references/observation-record.md",
-    ],
     "prd-assistant": [
         "references/input-intake.md",
         "references/写法指南.md",
@@ -22,11 +15,16 @@ REQUIRED = {
         "references/图片嵌入与截图指南.md",
         "references/语言表述规范.md",
         "references/final-output-hygiene.md",
-    ],
-    "html-prototype": [
-        "references/site-reference.md",
-        "references/responsive-guide.md",
-        "references/visual-validation.md",
+        "references/browser/observation.md",
+        "references/browser/tool-adapter.md",
+        "references/browser/snapshot-and-interaction.md",
+        "references/browser/auth-and-sessions.md",
+        "references/browser/evidence-and-diagnostics.md",
+        "references/browser/observation-record.md",
+        "references/prototype/generation.md",
+        "references/prototype/responsive-guide.md",
+        "references/prototype/site-reference.md",
+        "references/prototype/visual-validation.md",
     ],
 }
 FORBIDDEN = [
@@ -47,8 +45,8 @@ PRD_POLICY_MARKERS = [
     "缺陷修复过程",
     "功能下线",
     "运营后台操作手册",
-    "### 默认不调用 `browser-observer`",
-    "### 默认不调用 `html-prototype`",
+    "### 默认不执行页面观察",
+    "### 默认不生成原型",
     "最终文档不用删除线",
     "核心分歧集中提出最少问题并暂停定稿",
     "待确认内容不得进入确定性验收",
@@ -69,7 +67,7 @@ IMAGE_GUIDE_REQUIRED_MARKERS = [
     "## 图片排布",
     "每张截图必须紧跟对应描述或对应小标题",
     "禁止把各模块截图统一堆到章节末尾或文档末尾",
-    "需要制作或验证 HTML 原型时调用 `html-prototype`",
+    "需要制作或验证 HTML 原型时按 [prototype/generation.md](prototype/generation.md) 执行",
 ]
 IMAGE_GUIDE_FORBIDDEN_MARKERS = [
     "Selenium",
@@ -184,19 +182,20 @@ def main() -> int:
     for name, references in REQUIRED.items():
         errors.extend(check_skill(name, references))
 
-    errors.extend(check_markers(ROOT / "prd-assistant" / "SKILL.md", PRD_POLICY_MARKERS))
+    prd_root = ROOT / "prd-assistant"
+    errors.extend(check_markers(prd_root / "SKILL.md", PRD_POLICY_MARKERS))
     errors.extend(check_markers(ROOT / "README.md", README_POLICY_MARKERS))
-    image_guide = ROOT / "prd-assistant" / "references" / "图片嵌入与截图指南.md"
+    image_guide = prd_root / "references" / "图片嵌入与截图指南.md"
     errors.extend(check_markers(image_guide, IMAGE_GUIDE_REQUIRED_MARKERS))
     errors.extend(check_forbidden_markers(image_guide, IMAGE_GUIDE_FORBIDDEN_MARKERS))
-    errors.extend(check_markers(ROOT / "browser-observer" / "SKILL.md", BROWSER_POLICY_MARKERS))
-    errors.extend(check_markers(ROOT / "html-prototype" / "SKILL.md", PROTOTYPE_POLICY_MARKERS))
+    errors.extend(check_markers(prd_root / "references" / "browser" / "observation.md", BROWSER_POLICY_MARKERS))
+    errors.extend(check_markers(prd_root / "references" / "prototype" / "generation.md", PROTOTYPE_POLICY_MARKERS))
 
-    responsive_guide = ROOT / "html-prototype" / "references" / "responsive-guide.md"
+    responsive_guide = prd_root / "references" / "prototype" / "responsive-guide.md"
     errors.extend(check_forbidden_markers(responsive_guide, RESPONSIVE_FORBIDDEN_MARKERS))
-    visual_validation = ROOT / "html-prototype" / "references" / "visual-validation.md"
+    visual_validation = prd_root / "references" / "prototype" / "visual-validation.md"
     errors.extend(check_forbidden_markers(visual_validation, VISUAL_FORBIDDEN_MARKERS))
-    writing_guide = ROOT / "prd-assistant" / "references" / "写法指南.md"
+    writing_guide = prd_root / "references" / "写法指南.md"
     errors.extend(check_markers(writing_guide, PRD_WRITING_REQUIRED_MARKERS))
 
     for path in ROOT.rglob("*"):
@@ -237,9 +236,9 @@ def main() -> int:
         return 1
 
     print(
-        f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、必需参考文件、"
+        f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、全部必需参考文件（含 browser/ 和 prototype/ 子目录）、"
         "非图片 Markdown 链接（图片目标未检查）、基础敏感文本模式、PRD 内容边界与观察/原型分流，"
-        "图片指南职责边界、最小追问闭环、browser-observer 收窄触发、html-prototype 最小范围与按需验证，"
+        "图片指南职责边界、最小追问闭环、页面观察收窄触发、原型最小范围与按需验证，"
         "responsive-guide 与 visual-validation 无强制双端残留，写法指南含成功判定规则；"
         "并核对了运行版文件一致性。"
     )

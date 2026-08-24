@@ -92,13 +92,13 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 
 - 纯文字、纪要、聊天记录、流程图：直接提炼需求，信息不足处标待确认。
 - 清晰截图或设计稿：提取可见结构、文案、状态和改动，不默认做原型。
-- URL：仅当用户明确要求观察，或会改变核心方案或验收的事实无法确认且存在授权页面时，调用 `browser-observer`。
+- URL：仅当用户明确要求观察，或会改变核心方案或验收的事实无法确认且存在授权页面时，按 [references/browser/observation.md](references/browser/observation.md) 执行页面观察。
 - 已有 PRD：保留有效事实，删除重复、矛盾和编辑残留，再按需求类型补齐核心内容。
 - 混合材料：分别提取来源；冲突时优先采用用户当前任务中的最新明确确认。
 
 ## 原型与观察分流
 
-### 默认不调用 `browser-observer`
+### 默认不执行页面观察
 
 只有满足以下任一条件时才观察页面：
 
@@ -106,9 +106,9 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 - 会改变核心方案或验收的事实无法从现有材料确认，且存在授权页面
 - 用户明确要求页面证据、截图或当前交互记录
 
-只需写 PRD、材料已足够、截图虽不完整但不影响核心结论时，不观察；将缺口标为待确认即可。
+只需写 PRD、材料已足够、截图虽不完整但不影响核心结论时，不观察；将缺口标为待确认即可。观察方法见 [references/browser/observation.md](references/browser/observation.md)。
 
-### 默认不调用 `html-prototype`
+### 默认不生成原型
 
 只有满足以下任一条件时才生成原型：
 
@@ -116,7 +116,7 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 - 用户明确要求用原型验证关键交互或响应式布局
 - 单靠文字无法表达核心产品方案，并经用户确认需要原型
 
-不要因为需求包含页面、弹窗、状态切换或截图就自动生成原型。若同时需要网站参考和原型，先观察必要页面，再生成原型；只覆盖本次改动涉及的核心页面和状态。
+不要因为需求包含页面、弹窗、状态切换或截图就自动生成原型。若同时需要网站参考和原型，先观察必要页面，再生成原型；只覆盖本次改动涉及的核心页面和状态。原型实现方法见 [references/prototype/generation.md](references/prototype/generation.md)。
 
 ## 工作流程
 
@@ -165,5 +165,13 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 | [references/图片嵌入与截图指南.md](references/图片嵌入与截图指南.md) | 用户要求图片或原型时的嵌图规则 |
 | [references/语言表述规范.md](references/语言表述规范.md) | 自然、直接的产品语言 |
 | [references/final-output-hygiene.md](references/final-output-hygiene.md) | 编辑残留和被否方案清理 |
-
-浏览器操作方法由 `browser-observer` 负责，HTML 实现与视觉验证由 `html-prototype` 负责。本 Skill 只定义何时需要它们及如何消费结果。
+| [references/browser/observation.md](references/browser/observation.md) | 页面观察的触发条件、流程和纪律 |
+| [references/browser/tool-adapter.md](references/browser/tool-adapter.md) | 宿主浏览器与兼容 CLI 的能力映射 |
+| [references/browser/snapshot-and-interaction.md](references/browser/snapshot-and-interaction.md) | 快照、元素引用和错误恢复 |
+| [references/browser/auth-and-sessions.md](references/browser/auth-and-sessions.md) | 用户登录、会话隔离和清理 |
+| [references/browser/evidence-and-diagnostics.md](references/browser/evidence-and-diagnostics.md) | 截图、控制台和网络诊断 |
+| [references/browser/observation-record.md](references/browser/observation-record.md) | 标准观察记录与交接模板 |
+| [references/prototype/generation.md](references/prototype/generation.md) | HTML 原型生成流程和约束 |
+| [references/prototype/responsive-guide.md](references/prototype/responsive-guide.md) | PC/H5 响应式实现规范 |
+| [references/prototype/site-reference.md](references/prototype/site-reference.md) | 网站观察结果的原创转译与版权边界 |
+| [references/prototype/visual-validation.md](references/prototype/visual-validation.md) | 截图对比验证方法与验收标准 |

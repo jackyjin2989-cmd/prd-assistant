@@ -1,23 +1,6 @@
----
-name: browser-observer
-description: 安全观察授权网站并输出结构化证据。仅在用户明确要求，或会改变核心方案或验收的事实无法确认且存在授权页面时调用。
----
-
-# Browser Observer
-
-## 目标
+# 页面观察
 
 在用户授权范围内，通过宿主提供的浏览器能力或兼容的浏览器自动化工具，采集可复核的页面结构、文案、交互状态、响应式变化与异常证据。只负责观察和记录，不负责撰写 PRD 或实现 HTML 原型。
-
-## 职责边界
-
-| 任务 | 负责 Skill |
-|---|---|
-| 访问网站、用户接管登录、页面快照、交互观察、证据采集 | `browser-observer` |
-| 将事实整理为需求、规则、验收和待确认项 | `prd-assistant` |
-| 根据截图与观察记录实现并验证 HTML 原型 | `html-prototype` |
-
-不要在本 Skill 中复制原型的响应式实现规范、视觉还原规范或 PRD 写法。
 
 ## 触发条件
 
@@ -41,20 +24,20 @@ URL、截图模糊或裁切、缺少普通交互状态、PC/H5 差异等均不�
 ## 标准流程
 
 1. **界定范围**：确认 URL、允许访问的页面、账号环境、可点击范围、是否允许提交或下载、脱敏要求和目标设备。
-2. **检查能力**：确认可用浏览器、视口控制、截图、快照、网络/控制台诊断及会话能力；缺失时按 [references/tool-adapter.md](references/tool-adapter.md) 降级。
+2. **检查能力**：确认可用浏览器、视口控制、截图、快照、网络/控制台诊断及会话能力；缺失时按 [tool-adapter.md](tool-adapter.md) 降级。
 3. **建立会话**：单站点使用独立会话；测试、生产、不同账号或不同权限必须隔离。需要登录时让用户接管。
 4. **建立基线**：打开页面，短时等待并反复检查关键元素；记录标题、URL、导航、内容区、控件、默认状态和首张截图。
 5. **观察交互**：按用户路径逐步点击、填写非敏感测试值或切换状态；每次页面变化后重新快照并记录前后差异。
 6. **覆盖状态**：只选择会影响本次结论的状态进行观察；与结论无关的状态标记为"不适用"，不要求全部观察。
 7. **响应式观察**：按任务需要观察 PC、窄屏 PC 和 H5；只记录真实变化，不根据单一视口猜测其他端行为。
 8. **诊断异常**：页面空白、请求失败或交互无响应时，检查控制台与网络证据；不绕过证书、验证码、权限和反自动化限制。
-9. **整理交付**：按 [references/observation-record.md](references/observation-record.md) 输出页面清单、状态、交互、响应式、截图、证据来源和待确认项。
+9. **整理交付**：按 [observation-record.md](observation-record.md) 输出页面清单、状态、交互、响应式、截图、证据来源和待确认项。
 10. **清理会话**：关闭临时会话，删除临时认证状态和含敏感信息的中间文件。
 
 ## 操作纪律
 
 - 操作前先列出标签页并获取当前页面快照。
-- 等待采用“短等待 → 快照确认 → 必要时再等待”，不使用盲目的长时间等待。
+- 等待采用"短等待 → 快照确认 → 必要时再等待"，不使用盲目的长时间等待。
 - 导航、点击、提交、异步加载、弹窗开关或布局变化后，重新获取快照。
 - 下一步依赖当前输出时必须停止连续操作，先读取结果再决定。
 - 可预测且不依赖中间结果的 2 至 5 个动作可以合并；存在分支判断时拆开。
@@ -69,7 +52,7 @@ URL、截图模糊或裁切、缺少普通交互状态、PC/H5 差异等均不�
 - 仅在用户明确要求复用登录态且环境支持安全存储时保存状态；状态文件视为机密，不得提交仓库或作为交付物。
 - 不同网站、环境、账号和角色使用隔离会话，避免 Cookie、缓存和本地存储串用。
 - 会话过期时让用户重新登录，不尝试自行恢复凭据。
-- 详细规则见 [references/auth-and-sessions.md](references/auth-and-sessions.md)。
+- 详细规则见 [auth-and-sessions.md](auth-and-sessions.md)。
 
 ## 错误恢复
 
@@ -98,8 +81,8 @@ URL、截图模糊或裁切、缺少普通交互状态、PC/H5 差异等均不�
 
 | 文件 | 用途 |
 |---|---|
-| [references/tool-adapter.md](references/tool-adapter.md) | 宿主浏览器与兼容 CLI 的能力映射、降级与命令模式 |
-| [references/snapshot-and-interaction.md](references/snapshot-and-interaction.md) | 快照、元素引用、等待、交互和错误恢复 |
-| [references/auth-and-sessions.md](references/auth-and-sessions.md) | 用户登录、会话隔离、状态复用和清理 |
-| [references/evidence-and-diagnostics.md](references/evidence-and-diagnostics.md) | 截图、状态差异、控制台、网络和动态内容诊断 |
-| [references/observation-record.md](references/observation-record.md) | 标准观察记录与交接模板 |
+| [tool-adapter.md](tool-adapter.md) | 宿主浏览器与兼容 CLI 的能力映射、降级与命令模式 |
+| [snapshot-and-interaction.md](snapshot-and-interaction.md) | 快照、元素引用、等待、交互和错误恢复 |
+| [auth-and-sessions.md](auth-and-sessions.md) | 用户登录、会话隔离、状态复用和清理 |
+| [evidence-and-diagnostics.md](evidence-and-diagnostics.md) | 截图、状态差异、控制台、网络和动态内容诊断 |
+| [observation-record.md](observation-record.md) | 标准观察记录与交接模板 |

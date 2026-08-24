@@ -29,15 +29,15 @@
 2. 区分不同页面和同一页面的不同状态。
 3. 截图足以支持改动说明时直接写 PRD。
 4. 关键交互无法从截图确认时，优先标待确认；仅在用户提供授权页面且结论必须核实时观察。
-5. 用户明确要求交互原型或改动后页面时，再调用 `html-prototype`。
+5. 用户明确要求交互原型或改动后页面时，再按 [prototype/generation.md](prototype/generation.md) 制作原型。
 
 ## 网站 URL
 
 URL 不自动等于观察任务，也不自动等于原型任务。
 
 - 用户只提供 URL 作为背景，但核心需求已经明确：直接写 PRD，不访问。
-- 用户要求核实现状、采集证据或说明当前流程：调用 `browser-observer`，只观察相关页面和状态。
-- 用户要求参考网站制作原型：先观察必要部分，再调用 `html-prototype`。
+- 用户要求核实现状、采集证据或说明当前流程：按 [browser/observation.md](browser/observation.md) 观察相关页面和状态。
+- 用户要求参考网站制作原型：先观察必要部分，再按 [prototype/generation.md](prototype/generation.md) 制作原型。
 - 用户未授权访问或不需要核实：不访问，把无法确认的信息标为待确认。
 
 ## 已有 PRD

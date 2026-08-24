@@ -1,25 +1,6 @@
----
-name: "html-prototype"
-description: "按用户明确要求创建自包含 HTML 交互原型，只实现核心交互所需的最小平台、页面和状态；双端、截图对比与完整验证均按需执行。"
----
+# 原型生成
 
-# HTML Prototype
-
-## 目标
-
-交付可直接打开、可交互的自包含 HTML 原型。仅实现用户明确要求以及表达核心交互所需的最小平台、页面和状态；原型用于表达产品行为，不伪造生产能力，不携带第三方受限制资产或用户凭据。
-
-## 职责边界
-
-本 Skill 负责原型的信息架构转译、页面实现、交互状态、响应式适配和视觉验证，不负责访问网站、处理登录或采集页面证据。
-
-| 任务 | 负责 Skill |
-|---|---|
-| 访问授权网站、观察页面和交互、采集截图与诊断证据 | `browser-observer` |
-| 将事实整理为需求、规则、验收和待确认项 | `prd-assistant` |
-| 根据需求、截图或观察记录实现并验证 HTML 原型 | `html-prototype` |
-
-用户只要求核实现有页面时，不生成原型。仅当用户明确要求观察，或会改变核心方案或验收的事实无法确认且存在授权页面时，才先调用 `browser-observer`；URL、截图模糊或 PC/H5 场景不单独触发观察。
+交付可直接打开、可交互的自包含 HTML 原型。本模块负责原型的信息架构转译、页面实现、交互状态、响应式适配和视觉验证；仅实现用户明确要求以及表达核心交互所需的最小平台、页面和状态；原型用于表达产品行为，不伪造生产能力，不携带第三方受限制资产或用户凭据。
 
 ## 输入来源
 
@@ -27,14 +8,14 @@ description: "按用户明确要求创建自包含 HTML 交互原型，只实现
 
 1. 用户明确需求、已确认业务规则与品牌约束；
 2. 已批准的设计稿、线框图和清晰截图；
-3. `browser-observer` 输出的结构化观察记录、状态证据与脱敏截图；
+3. 页面观察输出的结构化观察记录、状态证据与脱敏截图；
 4. 通用界面惯例。
 
-不同输入场景的处理方式见 [../prd-assistant/references/input-intake.md](../prd-assistant/references/input-intake.md)。观察材料中已确认事实、推断、待确认项必须分开使用，未验证行为不得直接实现为确定规则。
+不同输入场景的处理方式见 [../input-intake.md](../input-intake.md)。观察材料中已确认事实、推断、待确认项必须分开使用，未验证行为不得直接实现为确定规则。
 
 ## 观察记录转译
 
-消费 `browser-observer` 输出时，只提取原型实现所需信息：
+消费页面观察输出时，只提取原型实现所需信息：
 
 - 页面清单、入口、导航和内容层级；
 - 组件类型、字段、操作和可见文案；
@@ -42,7 +23,7 @@ description: "按用户明确要求创建自包含 HTML 交互原型，只实现
 - PC/H5 的真实布局差异和未验证断点；
 - 截图索引、视口、状态与证据来源。
 
-参考网站只用于理解信息层级、布局规律、交互模式和响应式行为。不得复制受版权限制的源码、图像、字体、商标或大段文案；使用原创结构、样式、占位素材和通用图标。详细边界见 [references/site-reference.md](references/site-reference.md)。
+参考网站只用于理解信息层级、布局规律、交互模式和响应式行为。不得复制受版权限制的源码、图像、字体、商标或大段文案；使用原创结构、样式、占位素材和通用图标。详细边界见 [site-reference.md](site-reference.md)。
 
 ## 原型生成流程
 
@@ -58,7 +39,7 @@ description: "按用户明确要求创建自包含 HTML 交互原型，只实现
 
 ## PC / H5 响应式
 
-响应式不是整体缩放，而是针对不同设备重新组织内容和交互。详细规范见 [references/responsive-guide.md](references/responsive-guide.md)。
+响应式不是整体缩放，而是针对不同设备重新组织内容和交互。详细规范见 [responsive-guide.md](responsive-guide.md)。
 
 - 只实现用户明确要求的平台；用户要求双端或核心交互确需跨端表达时，再同时实现 PC/H5。
 - PC 或 H5 的具体视口、补测尺寸和断点按用户要求或目标材料确定，不预设必须覆盖两套尺寸。
@@ -91,7 +72,7 @@ description: "按用户明确要求创建自包含 HTML 交互原型，只实现
 5. 设置项目自己的阈值；超过阈值时输出差异图并人工复核。
 6. PC 与 H5 分开设基准，动态时间、随机数据和动画应固定或遮罩。
 
-详细方法见 [references/visual-validation.md](references/visual-validation.md)。
+详细方法见 [visual-validation.md](visual-validation.md)。
 
 ## 交付清单
 
@@ -113,6 +94,6 @@ description: "按用户明确要求创建自包含 HTML 交互原型，只实现
 
 | 文件 | 用途 |
 |------|------|
-| [references/site-reference.md](references/site-reference.md) | 网站观察结果的原创转译与版权边界 |
-| [references/responsive-guide.md](references/responsive-guide.md) | PC/H5 响应式实现规范（组件适配、断点、触控） |
-| [references/visual-validation.md](references/visual-validation.md) | 截图对比验证方法与验收标准 |
+| [site-reference.md](site-reference.md) | 网站观察结果的原创转译与版权边界 |
+| [responsive-guide.md](responsive-guide.md) | PC/H5 响应式实现规范（组件适配、断点、触控） |
+| [visual-validation.md](visual-validation.md) | 截图对比验证方法与验收标准 |
