@@ -84,6 +84,9 @@ BROWSER_POLICY_MARKERS = [
 INTAKE_POLICY_MARKERS = [
     "的“冲突处理”为唯一完整定义",
 ]
+SKILL_FORBIDDEN_MARKERS = [
+    "### 建议结构",
+]
 PROTOTYPE_POLICY_MARKERS = [
     "的“原型与观察分流”为唯一完整定义",
     "信息架构转译、页面实现、交互状态、响应式适配和视觉验证",
@@ -189,6 +192,7 @@ def main() -> int:
 
     prd_root = ROOT / "prd-assistant"
     errors.extend(check_markers(prd_root / "SKILL.md", PRD_POLICY_MARKERS))
+    errors.extend(check_forbidden_markers(prd_root / "SKILL.md", SKILL_FORBIDDEN_MARKERS))
     errors.extend(check_markers(ROOT / "README.md", README_POLICY_MARKERS))
     image_guide = prd_root / "references" / "图片嵌入与截图指南.md"
     errors.extend(check_markers(image_guide, IMAGE_GUIDE_REQUIRED_MARKERS))
@@ -216,7 +220,8 @@ def main() -> int:
             if re.search(pattern, text):
                 errors.append(f"{path.relative_to(ROOT)} 命中禁止模式: {pattern}")
 
-    if RUNTIME_BASE.is_dir():
+    runtime_checked = RUNTIME_BASE.is_dir()
+    if runtime_checked:
         for skill_name, refs in REQUIRED.items():
             runtime_skill = RUNTIME_BASE / skill_name
             if not runtime_skill.is_dir():
@@ -226,6 +231,8 @@ def main() -> int:
             if runtime_skill_file.is_file() and repo_skill_file.is_file():
                 if (runtime_skill_file.read_bytes()) != (repo_skill_file.read_bytes()):
                     errors.append(f"运行版 {skill_name}/SKILL.md 与仓库版不一致")
+            elif not runtime_skill_file.is_file() and repo_skill_file.is_file():
+                errors.append(f"运行版缺少 {skill_name}/SKILL.md")
             for ref in refs:
                 runtime_ref = runtime_skill / ref
                 repo_ref = ROOT / skill_name / ref
@@ -241,12 +248,12 @@ def main() -> int:
             print(f"- {error}")
         return 1
 
+    runtime_note = "并核对了运行版文件一致性。" if runtime_checked else "未找到运行版目录，已跳过运行版一致性核对。"
     print(
         f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、全部必需参考文件（含 browser/ 和 prototype/ 子目录）、"
         "非图片 Markdown 链接（图片目标未检查）、基础敏感文本模式、PRD 内容边界与观察/原型分流，"
         "图片指南职责边界、最小追问闭环、页面观察收窄触发、原型最小范围与按需验证，"
-        "responsive-guide 与 visual-validation 无强制双端残留，写法指南含成功判定规则；"
-        "并核对了运行版文件一致性。"
+        f"responsive-guide 与 visual-validation 无强制双端残留，写法指南含成功判定规则；{runtime_note}"
     )
     return 0
 

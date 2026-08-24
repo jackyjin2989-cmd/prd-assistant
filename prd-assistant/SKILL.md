@@ -56,7 +56,7 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 
 - 纯文字、纪要、聊天记录、流程图：直接提炼需求，信息不足处标待确认。
 - 清晰截图或设计稿：提取可见结构、文案、状态和改动，不默认做原型。
-- URL：仅当用户明确要求观察，或会改变核心方案或验收的事实无法确认且存在授权页面时，按 [references/browser/observation.md](references/browser/observation.md) 执行页面观察。
+- URL：不自动触发观察；满足下方“原型与观察分流”的观察条件时，按 [references/browser/observation.md](references/browser/observation.md) 执行页面观察。
 - 已有 PRD：保留有效事实，删除重复、矛盾和编辑残留，再按需求类型补齐核心内容。
 - 混合材料：分别提取来源；冲突时优先采用用户当前任务中的最新明确确认。
 
@@ -116,7 +116,7 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 - 多语言、图片、流程图、存量数据、追踪矩阵和非功能要求均按需，不默认增加。
 - 截图用于澄清布局或改动时才嵌入；已有截图足够时不重新制作。
 - 核心验收使用“前置条件 / 操作 / 预期结果”；简单改动可直接跟在改动点后。
-- 最终文档不用删除线保留被淘汰内容，也不得出现“XX问题已判断”“XX问题已解决”等分析过程字样；若确需变更记录，放在用户明确要求的变更日志中。
+- 最终文档不用删除线保留被淘汰内容，也不得出现“XX问题已判断”“XX问题已解决”等分析过程字样；若确需变更记录，放在变更日志中，触发条件见写法指南的“按需内容”。
 - 语言表达遵循 [references/语言表述规范.md](references/语言表述规范.md)。
 
 ## 参考文件
@@ -131,7 +131,7 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 | [references/final-output-hygiene.md](references/final-output-hygiene.md) | 编辑残留和被否方案清理 |
 | [references/browser/observation.md](references/browser/observation.md) | 页面观察的触发条件、流程和纪律 |
 | [references/browser/tool-adapter.md](references/browser/tool-adapter.md) | 宿主浏览器与兼容 CLI 的能力映射 |
-| [references/browser/snapshot-and-interaction.md](references/browser/snapshot-and-interaction.md) | 快照、元素引用和错误恢复 |
+| [references/browser/snapshot-and-interaction.md](references/browser/snapshot-and-interaction.md) | 快照、元素引用和失败恢复 |
 | [references/browser/auth-and-sessions.md](references/browser/auth-and-sessions.md) | 用户登录、会话隔离和清理 |
 | [references/browser/evidence-and-diagnostics.md](references/browser/evidence-and-diagnostics.md) | 截图、控制台和网络诊断 |
 | [references/browser/observation-record.md](references/browser/observation-record.md) | 标准观察记录与交接模板 |

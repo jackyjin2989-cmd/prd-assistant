@@ -72,7 +72,7 @@
 | 文件 | 用途 |
 |---|---|
 | [tool-adapter.md](tool-adapter.md) | 宿主浏览器与兼容 CLI 的能力映射、降级与命令模式 |
-| [snapshot-and-interaction.md](snapshot-and-interaction.md) | 快照、元素引用、等待、交互和错误恢复 |
+| [snapshot-and-interaction.md](snapshot-and-interaction.md) | 快照、元素引用、等待、交互和失败恢复 |
 | [auth-and-sessions.md](auth-and-sessions.md) | 用户登录、会话隔离、状态复用和清理 |
 | [evidence-and-diagnostics.md](evidence-and-diagnostics.md) | 截图、状态差异、控制台、网络和动态内容诊断 |
 | [observation-record.md](observation-record.md) | 标准观察记录与交接模板 |
