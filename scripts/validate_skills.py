@@ -58,6 +58,9 @@ README_POLICY_MARKERS = [
     "图片指南的职责边界与关键规则",
     "截图模糊、PC/H5 等不单独触发",
     "核心分歧集中追问并暂停定稿",
+    "支持截图驱动还原",
+    "目标视口视觉验证",
+    "不作为逐像素复制目标",
 ]
 IMAGE_GUIDE_REQUIRED_MARKERS = [
     "## 图片选择",
@@ -94,6 +97,8 @@ PROTOTYPE_POLICY_MARKERS = [
     "确定最小范围",
     "双端支持按需",
     "完整状态矩阵不作为默认完成条件",
+    "不得擅自把截图替换成更熟悉的通用后台",
+    "必须调用 [visual-validation.md](visual-validation.md)",
 ]
 RESPONSIVE_FORBIDDEN_MARKERS = [
     "原型必须同时支持 PC 和 H5",
@@ -103,6 +108,22 @@ RESPONSIVE_FORBIDDEN_MARKERS = [
 VISUAL_FORBIDDEN_MARKERS = [
     "建议矩阵",
     "最小状态",
+]
+VISUAL_REQUIRED_MARKERS = [
+    "截图驱动的最低验证",
+    "环境支持渲染和截图时",
+    "环境支持渲染但不能截图时",
+    "环境不能渲染时",
+    "最终结论：通过 / 受限 / 未完成",
+    "不作为逐像素复制目标",
+]
+REVIEW_REQUIRED_MARKERS = [
+    "截图驱动原型是否先识别界面身份",
+    "记录结论为“通过 / 受限 / 未完成”",
+]
+RESPONSIVE_REQUIRED_MARKERS = [
+    "以目标材料为准",
+    "不得为了套用通用模式",
 ]
 RUNTIME_BASE = ROOT.parent / ".trae" / "skills"
 PRD_WRITING_REQUIRED_MARKERS = [
@@ -203,8 +224,12 @@ def main() -> int:
 
     responsive_guide = prd_root / "references" / "prototype" / "responsive-guide.md"
     errors.extend(check_forbidden_markers(responsive_guide, RESPONSIVE_FORBIDDEN_MARKERS))
+    errors.extend(check_markers(responsive_guide, RESPONSIVE_REQUIRED_MARKERS))
     visual_validation = prd_root / "references" / "prototype" / "visual-validation.md"
     errors.extend(check_forbidden_markers(visual_validation, VISUAL_FORBIDDEN_MARKERS))
+    errors.extend(check_markers(visual_validation, VISUAL_REQUIRED_MARKERS))
+    review_checklist = prd_root / "references" / "review-checklist.md"
+    errors.extend(check_markers(review_checklist, REVIEW_REQUIRED_MARKERS))
     writing_guide = prd_root / "references" / "写法指南.md"
     errors.extend(check_markers(writing_guide, PRD_WRITING_REQUIRED_MARKERS))
 
@@ -252,8 +277,8 @@ def main() -> int:
     print(
         f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、全部必需参考文件（含 browser/ 和 prototype/ 子目录）、"
         "非图片 Markdown 链接（图片目标未检查）、基础敏感文本模式、PRD 内容边界与观察/原型分流，"
-        "图片指南职责边界、最小追问闭环、页面观察收窄触发、原型最小范围与按需验证，"
-        f"responsive-guide 与 visual-validation 无强制双端残留，写法指南含成功判定规则；{runtime_note}"
+        "图片指南职责边界、最小追问闭环、页面观察收窄触发、原型最小范围与截图驱动还原，"
+        f"responsive-guide 目标材料优先、visual-validation 三态结论与审校闭环，写法指南含成功判定规则；{runtime_note}"
     )
     return 0
 
