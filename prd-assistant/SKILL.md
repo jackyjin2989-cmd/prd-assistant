@@ -40,6 +40,7 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 4. **按需取材**：现有材料足够时直接写；不为“更完整”默认访问网站、生成原型、补截图或做多端验证。
 5. **一处定义**：同一规则只完整描述一次，其他位置用稳定标题引用。
 6. **最终态交付**：直接呈现采用后的内容，移除被否方案、删除线、草稿备注、会话过程和编辑残留。
+7. **PRD 与原型分离**：PRD 文档和交互原型是两个独立交付物，PRD 中不嵌入可运行原型代码；但交付物包含原型时，PRD 应在对应描述下嵌入原型主要页面和状态的静态截图，具体规则见 [references/图片嵌入与截图指南.md](references/图片嵌入与截图指南.md)。
 
 ## 需求复杂度
 
@@ -92,7 +93,8 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 6. 仅在满足触发条件时进行页面观察或原型制作；截图驱动原型必须按 [references/prototype/visual-validation.md](references/prototype/visual-validation.md) 给出视觉验证结论。
 7. PRD 按 [references/写法指南.md](references/写法指南.md) 起草或改写；原型按 [references/prototype/generation.md](references/prototype/generation.md) 实现。
 8. 使用 [references/review-checklist.md](references/review-checklist.md) 审校对应交付物的闭环、矛盾、重复和验收。
-9. 按 [references/final-output-hygiene.md](references/final-output-hygiene.md) 清理编辑残留后交付。
+9. 内部可用稳定编号（如 REQ/RULE/AC）做需求追踪和验收对照，但编号和追踪矩阵不得写入 PRD 正文，也不单独输出追踪章节。
+10. 按 [references/final-output-hygiene.md](references/final-output-hygiene.md) 清理编辑残留后交付。
 
 若用户要求直接修改已有文档或仓库，且目标与改动明确，可直接执行，不默认增加“先给计划、等待确认”的往返。
 
