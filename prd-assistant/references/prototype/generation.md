@@ -87,7 +87,7 @@
 - 使用 `header/nav/main/section/form/button` 等语义标签。
 - 交互控件提供可见焦点、标签和合理的 ARIA 状态。
 - 正文对比度与触控区域满足常见可访问性要求。
-- 每个需求映射区域使用稳定的 `data-feature`；PRD 已使用 `REQ-001` 等需求 ID 时沿用相同值，例如 `data-feature="REQ-001"`，未编号时使用清晰、稳定的语义 ID。
+- 每个需求映射区域使用清晰、稳定的语义 ID，例如 `data-feature="order-list"`。
 - 测试所需状态可通过查询参数或明确控件稳定进入，例如 `?state=empty`。
 - 不将密钥、账号、内部 URL 或真实个人数据写入前端。
 
@@ -124,4 +124,4 @@
 |------|------|
 | [site-reference.md](site-reference.md) | 网站观察结果的原创转译与版权边界 |
 | [responsive-guide.md](responsive-guide.md) | PC/H5 响应式实现规范（组件适配、断点、触控） |
-| [visual-validation.md](visual-validation.md) | 截图对比验证方法与验收标准 |
+| [visual-validation.md](visual-validation.md) | 截图对比验证方法与判定标准 |
