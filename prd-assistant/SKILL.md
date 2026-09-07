@@ -16,7 +16,7 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 这是本 Skill 优先级最高的写作规则：
 
 1. **篇幅与复杂度匹配**：A 微调型通常半页以内；一句话能说清的改动不得扩成三段。宁可短到"像没写完"，也不写凑数内容。
-2. **默认不写以下章节**，用户明确要求才补：验收标准、测试用例、本期不做/范围排除、成功指标、里程碑、风险评估、FAQ、版本记录、名词解释、非功能要求。少数例外条件（如需求本身就是增长/效率目标时的成功判定）以 [references/写法指南.md](references/写法指南.md) 的"按需内容"表为唯一完整定义。
+2. **默认不写以下章节**，用户明确要求才补：验收标准、测试用例、本期不做/范围排除、成功判定、里程碑、风险评估、FAQ、版本记录、名词解释、非功能要求。少数例外条件（如需求本身就是增长/效率目标时的成功判定）以 [references/写法指南.md](references/写法指南.md) 的"按需内容"表为唯一完整定义。
 3. **同一信息只出现一次**：改动点里写过的规则，不再在"业务规则""注意事项"里换个说法重复；结尾不写总结。
 4. **不写自证句**：不写"本 PRD 覆盖了……""以上改动已考虑……"这类向读者证明工作量的话。
 5. 语言表达遵循 [references/语言表述规范.md](references/语言表述规范.md)，消除 AI 腔。
@@ -90,10 +90,9 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 3. PRD 任务判断 A/B/C 复杂度；原型任务确定最小页面、状态和目标端。
 4. 依据"简单需求必须简单写"和"默认内容边界"裁剪；用户明确要求的例外单独纳入。
 5. 按 [references/边界扫描清单.md](references/边界扫描清单.md) 内部扫描本次改动的流程与逻辑缺口；命中的问题写进对应章节或待确认项，扫描过程不输出。
-6. 核心分歧集中提出最少问题并暂停定稿；非关键缺口继续处理并标待确认。
+6. 核心分歧按"最小追问闭环"处理。
 7. PRD 按 [references/写法指南.md](references/写法指南.md) 起草；原型按 [references/prototype/generation.md](references/prototype/generation.md) 实现，截图与视觉验证遵守 [references/prototype/visual-validation.md](references/prototype/visual-validation.md) 的能力判定。
-8. 用 [references/review-checklist.md](references/review-checklist.md) 审校闭环、矛盾和重复。
-9. 按 [references/final-output-hygiene.md](references/final-output-hygiene.md) 清理编辑残留后交付。
+8. 用 [references/review-checklist.md](references/review-checklist.md) 审校闭环、矛盾和重复，并按其中的"编辑残留与最终交付"清理后交付。
 
 若用户要求直接修改已有文档或仓库，且目标与改动明确，直接执行，不默认增加"先给计划、等待确认"的往返。
 
@@ -107,7 +106,7 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 4. 当前产品可核验行为、正式设计稿、截图、纪要和草稿；同级采用更新且更直接的证据
 5. 产品判断和通用惯例
 
-无法判断且会改变核心方案时，集中列出分歧及影响并暂停定稿；不影响核心结论时采用最小假设并标待确认。
+无法判断且会改变核心方案时，按"最小追问闭环"升级处理。
 
 ## 写作要求
 
@@ -116,7 +115,6 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 - 状态仅写用户或业务需要理解的状态及流转条件。
 - 产品可见异常写触发条件、页面反馈和用户下一步；不展开内部技术处置。
 - 多语言、图片、流程图、存量数据均按需，不默认增加。
-- 最终文档不用删除线保留被淘汰内容，不出现"XX问题已判断""XX问题已解决"等分析过程字样。
 - PRD 正文不含需求/规则/验收编号（如 REQ-01），不含追踪矩阵。
 
 ## 参考文件
@@ -127,10 +125,9 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 | [references/写法指南.md](references/写法指南.md) | A/B/C 类型的精简写法 |
 | [references/边界扫描清单.md](references/边界扫描清单.md) | 动笔前的流程与逻辑查漏 |
 | [references/示例.md](references/示例.md) | A/B 类目标形态与反例对照 |
-| [references/review-checklist.md](references/review-checklist.md) | 核心产品内容审校 |
+| [references/review-checklist.md](references/review-checklist.md) | 核心内容审校与交付清理（质量北极星） |
 | [references/图片嵌入与截图指南.md](references/图片嵌入与截图指南.md) | PRD 中图片的选择、脱敏、路径与排布 |
 | [references/语言表述规范.md](references/语言表述规范.md) | 自然、直接的产品语言 |
-| [references/final-output-hygiene.md](references/final-output-hygiene.md) | 编辑残留和被否方案清理 |
 | [references/prototype/generation.md](references/prototype/generation.md) | HTML 原型生成流程和约束 |
 | [references/prototype/responsive-guide.md](references/prototype/responsive-guide.md) | PC/H5 响应式实现规范 |
 | [references/prototype/visual-validation.md](references/prototype/visual-validation.md) | 截图能力判定与视觉验证 |

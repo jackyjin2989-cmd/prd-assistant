@@ -16,7 +16,6 @@ REQUIRED = {
         "references/review-checklist.md",
         "references/图片嵌入与截图指南.md",
         "references/语言表述规范.md",
-        "references/final-output-hygiene.md",
         "references/prototype/generation.md",
         "references/prototype/responsive-guide.md",
         "references/prototype/visual-validation.md",
@@ -25,6 +24,10 @@ REQUIRED = {
 # browser/ 目录已移除：本 Skill 不访问网站，页面现状由用户提供截图。
 FORBIDDEN_DIRS = [
     "prd-assistant/references/browser",
+]
+# final-output-hygiene.md 已并入 review-checklist.md（审校与交付清理）。
+FORBIDDEN_FILES = [
+    "prd-assistant/references/final-output-hygiene.md",
 ]
 FORBIDDEN = [
     r"TRAE\s+Design",
@@ -49,8 +52,8 @@ PRD_POLICY_MARKERS = [
     "请用户提供截图",
     "## 原型分流",
     "默认不生成原型",
-    "最终文档不用删除线",
-    "XX问题已判断",
+    "最小追问闭环",
+    "## 冲突处理",
 ]
 SKILL_FORBIDDEN_MARKERS = [
     "### 建议结构",
@@ -81,8 +84,9 @@ IMAGE_GUIDE_FORBIDDEN_MARKERS = [
 ]
 INTAKE_POLICY_MARKERS = [
     "本 Skill 不访问网站",
-    "不访问 URL",
+    "需要页面现状才能写清改动时请用户提供截图",
     "的\"冲突处理\"为唯一完整定义",
+    "的\"原型分流\"为唯一完整定义",
 ]
 INTAKE_FORBIDDEN_MARKERS = [
     "browser/",
@@ -116,9 +120,13 @@ VISUAL_REQUIRED_MARKERS = [
     "不作为逐像素复制目标",
 ]
 REVIEW_REQUIRED_MARKERS = [
+    "研发读完对应章节即可动手实现",
     "截图驱动原型是否先识别界面身份",
     "通过 / 受限 / 未完成",
     "是否出现了用户未要求的验收标准、本期不做",
+    "被否方案当作不存在",
+    "兼容展示 / 一次性刷数 / 新老划断",
+    "正文不含 REQ/RULE/AC 编号和追踪矩阵",
 ]
 PRD_WRITING_REQUIRED_MARKERS = [
     "简单需求必须简单写",
@@ -202,6 +210,10 @@ def check_skill(name: str, references: list[str]) -> list[str]:
     for forbidden_dir in FORBIDDEN_DIRS:
         if (ROOT / forbidden_dir).exists():
             errors.append(f"不应存在已移除目录 {forbidden_dir}")
+
+    for forbidden_file in FORBIDDEN_FILES:
+        if (ROOT / forbidden_file).exists():
+            errors.append(f"不应存在已移除文件 {forbidden_file}")
 
     return errors
 
@@ -308,7 +320,7 @@ def main() -> int:
         f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、全部必需参考文件、"
         "非图片 Markdown 链接、编码完整性、基础敏感文本模式、简单需求简单写与默认内容边界、"
         "不访问网站与原型分流、截图能力判定与降级规则、"
-        f"responsive-guide 目标材料优先、审校清单闭环；{runtime_note}"
+        f"responsive-guide 目标材料优先、审校北极星与交付清理；{runtime_note}"
     )
     return 0
 
