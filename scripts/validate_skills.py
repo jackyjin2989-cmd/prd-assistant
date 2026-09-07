@@ -11,6 +11,8 @@ REQUIRED = {
     "prd-assistant": [
         "references/input-intake.md",
         "references/写法指南.md",
+        "references/边界扫描清单.md",
+        "references/示例.md",
         "references/review-checklist.md",
         "references/图片嵌入与截图指南.md",
         "references/语言表述规范.md",
@@ -122,6 +124,27 @@ PRD_WRITING_REQUIRED_MARKERS = [
     "简单需求必须简单写",
     "| 验收标准 | 仅用户明确要求时 |",
     "硬性上限",
+    "边界扫描清单.md",
+    "示例.md",
+    "Mermaid",
+    "不输出角色权限矩阵",
+    "兼容展示",
+    "新老划断",
+]
+BOUNDARY_SCAN_REQUIRED_MARKERS = [
+    "并发、系统异常、性能等技术问题不在产品扫描范围内",
+    "## 状态与枚举类改动",
+    "## 字段类改动",
+    "## 流程类改动",
+    "## 权限类改动",
+    "不做角色矩阵",
+    "不为覆盖清单而扩写",
+]
+EXAMPLES_REQUIRED_MARKERS = [
+    "## A 类完整示例",
+    "## A 类反例",
+    "## B 类结构示例",
+    "## AI 味对照",
 ]
 RUNTIME_BASE = ROOT.parent / ".trae" / "skills"
 
@@ -233,6 +256,10 @@ def main() -> int:
     errors.extend(check_markers(review_checklist, REVIEW_REQUIRED_MARKERS))
     writing_guide = prd_root / "references" / "写法指南.md"
     errors.extend(check_markers(writing_guide, PRD_WRITING_REQUIRED_MARKERS))
+    boundary_scan = prd_root / "references" / "边界扫描清单.md"
+    errors.extend(check_markers(boundary_scan, BOUNDARY_SCAN_REQUIRED_MARKERS))
+    examples = prd_root / "references" / "示例.md"
+    errors.extend(check_markers(examples, EXAMPLES_REQUIRED_MARKERS))
 
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".git" in path.parts or path.name == "validate_skills.py":

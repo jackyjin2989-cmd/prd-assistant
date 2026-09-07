@@ -89,10 +89,11 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 2. 按交付类型分流：仅 PRD 执行写作与审校；仅原型执行生成与验证，不强制写 PRD；PRD + 原型先统一范围，再分别生成并检查一致性。
 3. PRD 任务判断 A/B/C 复杂度；原型任务确定最小页面、状态和目标端。
 4. 依据"简单需求必须简单写"和"默认内容边界"裁剪；用户明确要求的例外单独纳入。
-5. 核心分歧集中提出最少问题并暂停定稿；非关键缺口继续处理并标待确认。
-6. PRD 按 [references/写法指南.md](references/写法指南.md) 起草；原型按 [references/prototype/generation.md](references/prototype/generation.md) 实现，截图与视觉验证遵守 [references/prototype/visual-validation.md](references/prototype/visual-validation.md) 的能力判定。
-7. 用 [references/review-checklist.md](references/review-checklist.md) 审校闭环、矛盾和重复。
-8. 按 [references/final-output-hygiene.md](references/final-output-hygiene.md) 清理编辑残留后交付。
+5. 按 [references/边界扫描清单.md](references/边界扫描清单.md) 内部扫描本次改动的流程与逻辑缺口；命中的问题写进对应章节或待确认项，扫描过程不输出。
+6. 核心分歧集中提出最少问题并暂停定稿；非关键缺口继续处理并标待确认。
+7. PRD 按 [references/写法指南.md](references/写法指南.md) 起草；原型按 [references/prototype/generation.md](references/prototype/generation.md) 实现，截图与视觉验证遵守 [references/prototype/visual-validation.md](references/prototype/visual-validation.md) 的能力判定。
+8. 用 [references/review-checklist.md](references/review-checklist.md) 审校闭环、矛盾和重复。
+9. 按 [references/final-output-hygiene.md](references/final-output-hygiene.md) 清理编辑残留后交付。
 
 若用户要求直接修改已有文档或仓库，且目标与改动明确，直接执行，不默认增加"先给计划、等待确认"的往返。
 
@@ -124,6 +125,8 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 |---|---|
 | [references/input-intake.md](references/input-intake.md) | 输入处理与原型分流 |
 | [references/写法指南.md](references/写法指南.md) | A/B/C 类型的精简写法 |
+| [references/边界扫描清单.md](references/边界扫描清单.md) | 动笔前的流程与逻辑查漏 |
+| [references/示例.md](references/示例.md) | A/B 类目标形态与反例对照 |
 | [references/review-checklist.md](references/review-checklist.md) | 核心产品内容审校 |
 | [references/图片嵌入与截图指南.md](references/图片嵌入与截图指南.md) | PRD 中图片的选择、脱敏、路径与排布 |
 | [references/语言表述规范.md](references/语言表述规范.md) | 自然、直接的产品语言 |
