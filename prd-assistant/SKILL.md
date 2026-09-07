@@ -7,17 +7,29 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 
 ## 适用范围
 
-用于从文字、截图、会议纪要、聊天记录、观察结果或已有草稿中起草、补全、改写和审校 PRD。默认输出简体中文，目标是把核心产品功能和本次改动写清，而不是扩写技术方案或项目管理文档。
+从文字、截图、会议纪要、聊天记录或已有草稿中起草、补全、改写和审校 PRD；用户明确要求时制作自包含 HTML 原型。默认输出简体中文，目标是把核心产品功能和本次改动写清，而不是扩写技术方案或项目管理文档。
+
+本 Skill 不访问网站。需要了解页面现状时，请用户提供截图；用户无法提供且缺口影响核心方案时标待确认，不主动打开浏览器。
+
+## 简单需求必须简单写（硬规则）
+
+这是本 Skill 优先级最高的写作规则：
+
+1. **篇幅与复杂度匹配**：A 微调型通常半页以内；一句话能说清的改动不得扩成三段。宁可短到"像没写完"，也不写凑数内容。
+2. **默认不写以下章节**，用户明确要求才补：验收标准、测试用例、本期不做/范围排除、成功指标、里程碑、风险评估、FAQ、版本记录、名词解释、非功能要求。
+3. **同一信息只出现一次**：改动点里写过的规则，不再在"业务规则""注意事项"里换个说法重复；结尾不写总结。
+4. **不写自证句**：不写"本 PRD 覆盖了……""以上改动已考虑……"这类向读者证明工作量的话。
+5. 语言表达遵循 [references/语言表述规范.md](references/语言表述规范.md)，消除 AI 腔。
 
 ## 默认内容边界
 
 默认只写与本次需求直接相关的：
 
-- 背景与目标
 - 功能范围和改动点
 - 页面、字段、角色、状态、业务规则及用户可见异常
 - 影响存量业务时的数据处理
 - 关键待确认项
+- 背景与目标（仅 B/C 类需要；A 类一句话或省略）
 
 除非用户明确要求，或该内容本身就是产品功能不可缺少的约束，否则不写：
 
@@ -30,25 +42,25 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 - 功能下线、迁移执行方案
 - 运营后台操作手册或执行 SOP
 
-用户明确要求上述内容时，只补用户要求的部分，不把整份 PRD 扩成技术或运营文档。产品可见的等待状态、失败反馈、权限限制等仍应写清，但不推导其技术实现。
+用户明确要求上述内容时，只补用户要求的部分。产品可见的等待状态、失败反馈、权限限制等仍应写清，但不推导其技术实现。
 
 ## 基本原则
 
 1. **先写改动**：围绕用户问题和本期功能组织，不为模板完整补无关章节。
-2. **事实处理**：内部只区分现状与问题，不把推断写成现状，也不在最终稿展示分析分类。
-3. **最小追问闭环**：会改变核心方案或验收的分歧集中追问并暂停定稿；非关键缺口可继续并标待确认，待确认内容不得进入确定性验收。
-4. **按需取材**：现有材料足够时直接写；不为“更完整”默认访问网站、生成原型、补截图或做多端验证。
-5. **一处定义**：同一规则只完整描述一次，其他位置用稳定标题引用。
-6. **最终态交付**：直接呈现采用后的内容，移除被否方案、删除线、草稿备注、会话过程和编辑残留。
-7. **PRD 与原型分离**：PRD 文档和交互原型是两个独立交付物，PRD 中不嵌入可运行原型代码；但交付物包含原型时，PRD 应在对应描述下嵌入原型主要页面和状态的静态截图，具体规则见 [references/图片嵌入与截图指南.md](references/图片嵌入与截图指南.md)。
+2. **事实处理**：不把推断写成现状，也不在最终稿展示分析分类。
+3. **最小追问闭环**：会改变核心方案的分歧集中追问并暂停定稿；非关键缺口继续处理并标待确认。
+4. **按需取材**：现有材料足够时直接写；不为"更完整"要求补截图、生成原型或做多端验证。
+5. **一处定义**：同一规则只完整描述一次，其他位置引用。
+6. **最终态交付**：直接呈现采用后的内容，移除被否方案、删除线、草稿备注和编辑残留。
+7. **PRD 与原型分离**：两个独立交付物，PRD 不嵌入可运行原型代码；交付物包含原型且环境可截图时，PRD 在对应描述下嵌入原型静态截图，规则见 [references/图片嵌入与截图指南.md](references/图片嵌入与截图指南.md)。
 
 ## 需求复杂度
 
-- **A 微调型**：已有页面或功能上的文案、字段、展示、校验等局部调整，不新增完整模块或流程；重点写清改动和直接影响。
-- **B 模块级**：新增或重构一个页面、弹窗、模块或业务流程，主要在一个产品范围内完成；重点写清功能范围、操作、规则和关键状态。
-- **C 跨产品复杂业务**：涉及多个产品端、多个角色或完整业务链路，需要统一产品口径和跨端体验；重点统一业务流程和跨端口径。
+- **A 微调型**：已有页面上的文案、字段、展示、校验等局部调整。只写改动点和直接影响。
+- **B 模块级**：新增或重构一个页面、弹窗、模块或业务流程。写清功能范围、操作、规则和关键状态。
+- **C 跨产品复杂业务**：多个产品端、多个角色或完整业务链路。重点统一业务流程和跨端口径。
 
-复杂度只决定产品说明深度，不自动触发系统边界、接口、同步机制、非功能要求或发布方案。各类型的建议结构以 [references/写法指南.md](references/写法指南.md) 为唯一完整定义。
+复杂度只决定说明深度，不自动触发任何额外章节。各类型结构以 [references/写法指南.md](references/写法指南.md) 为唯一完整定义。
 
 ## 输入处理
 
@@ -56,47 +68,33 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 
 - 纯文字、纪要、聊天记录、流程图：直接提炼需求，信息不足处标待确认。
 - 清晰截图或设计稿：提取可见结构、文案、状态和改动，不默认做原型。
-- URL：不自动触发观察；满足下方“原型与观察分流”的观察条件时，按 [references/browser/observation.md](references/browser/observation.md) 执行页面观察。
+- 网站 URL：不访问。请用户提供相关页面截图；用户不提供时按现有材料处理，缺口标待确认。
 - 已有 PRD：保留有效事实，删除重复、矛盾和编辑残留，再按需求类型补齐核心内容。
 - 混合材料：分别提取来源；冲突时优先采用用户当前任务中的最新明确确认。
 
-## 原型与观察分流
+## 原型分流
 
-### 默认不执行页面观察
-
-只有满足以下任一条件时才观察页面：
-
-- 用户明确要求访问或核实现有网站
-- 会改变核心方案或验收的事实无法从现有材料确认，且存在授权页面
-- 用户明确要求页面证据、截图或当前交互记录
-
-只需写 PRD、材料已足够、截图虽不完整但不影响核心结论时，不观察；将缺口标为待确认即可。观察方法见 [references/browser/observation.md](references/browser/observation.md)。
-
-### 默认不生成原型
-
-只有满足以下任一条件时才生成原型：
+默认不生成原型。只有满足以下任一条件时才生成：
 
 - 用户明确要求 HTML、可交互原型或改动后页面
 - 用户提供截图或设计稿，并明确要求按图还原、复刻、照着制作或生成可交互页面
 - 用户明确要求用原型验证关键交互或响应式布局
 - 单靠文字无法表达核心产品方案，并经用户确认需要原型
 
-不要因为需求包含页面、弹窗、状态切换或截图就自动生成原型。用户只把截图用于说明内容、字段或状态时，不进入截图驱动还原；明确要求按图制作时，才以截图为主要视觉依据。若同时需要网站参考和原型，先观察必要页面，再生成原型；已有截图足够确定骨架和核心状态时不额外观察。只覆盖本次改动涉及的核心页面和状态。原型实现方法见 [references/prototype/generation.md](references/prototype/generation.md)。
+需求包含页面、弹窗、状态切换或截图不构成生成原型的理由。用户只把截图用于说明内容、字段或状态时，不进入截图驱动还原。只覆盖本次改动涉及的核心页面和状态。实现方法见 [references/prototype/generation.md](references/prototype/generation.md)。
 
 ## 工作流程
 
 1. 识别用户目标、输入材料和交付格式。
-2. 按交付类型分流：仅 PRD 执行写作与审校；仅原型执行生成、交互与视觉验证，不强制写 PRD；PRD + 原型先统一范围和功能，再分别生成并检查一致性。
-3. PRD 任务判断 A/B/C 复杂度，列出核心功能与改动；原型任务确定最小页面、状态和目标端。
-4. 依据默认内容边界删除无关主题；用户明确要求的例外单独纳入。
-5. 内部区分现状与问题；核心分歧集中提出最少问题并暂停定稿，非关键缺口继续处理并标为待确认。
-6. 仅在满足触发条件时进行页面观察或原型制作；截图驱动原型必须按 [references/prototype/visual-validation.md](references/prototype/visual-validation.md) 给出视觉验证结论。
-7. PRD 按 [references/写法指南.md](references/写法指南.md) 起草或改写；原型按 [references/prototype/generation.md](references/prototype/generation.md) 实现。
-8. 使用 [references/review-checklist.md](references/review-checklist.md) 审校对应交付物的闭环、矛盾、重复和验收。
-9. 内部可用稳定编号（如 REQ/RULE/AC）做需求追踪和验收对照，但编号和追踪矩阵不得写入 PRD 正文，也不单独输出追踪章节。
-10. 按 [references/final-output-hygiene.md](references/final-output-hygiene.md) 清理编辑残留后交付。
+2. 按交付类型分流：仅 PRD 执行写作与审校；仅原型执行生成与验证，不强制写 PRD；PRD + 原型先统一范围，再分别生成并检查一致性。
+3. PRD 任务判断 A/B/C 复杂度；原型任务确定最小页面、状态和目标端。
+4. 依据"简单需求必须简单写"和"默认内容边界"裁剪；用户明确要求的例外单独纳入。
+5. 核心分歧集中提出最少问题并暂停定稿；非关键缺口继续处理并标待确认。
+6. PRD 按 [references/写法指南.md](references/写法指南.md) 起草；原型按 [references/prototype/generation.md](references/prototype/generation.md) 实现，截图与视觉验证遵守 [references/prototype/visual-validation.md](references/prototype/visual-validation.md) 的能力判定。
+7. 用 [references/review-checklist.md](references/review-checklist.md) 审校闭环、矛盾和重复。
+8. 按 [references/final-output-hygiene.md](references/final-output-hygiene.md) 清理编辑残留后交付。
 
-若用户要求直接修改已有文档或仓库，且目标与改动明确，可直接执行，不默认增加“先给计划、等待确认”的往返。
+若用户要求直接修改已有文档或仓库，且目标与改动明确，直接执行，不默认增加"先给计划、等待确认"的往返。
 
 ## 冲突处理
 
@@ -108,7 +106,7 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 4. 当前产品可核验行为、正式设计稿、截图、纪要和草稿；同级采用更新且更直接的证据
 5. 产品判断和通用惯例
 
-无法判断且会改变核心方案或验收时，集中列出分歧及影响并暂停定稿；不影响核心结论时可采用最小假设并标待确认，但不得写入确定性验收。
+无法判断且会改变核心方案时，集中列出分歧及影响并暂停定稿；不影响核心结论时采用最小假设并标待确认。
 
 ## 写作要求
 
@@ -116,28 +114,20 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 - 字段仅写产品需要的名称、控件、取值、必填、默认值、展示与校验规则。
 - 状态仅写用户或业务需要理解的状态及流转条件。
 - 产品可见异常写触发条件、页面反馈和用户下一步；不展开内部技术处置。
-- 多语言、图片、流程图、存量数据和非功能要求均按需，不默认增加。
-- 截图用于澄清布局或改动时才嵌入；已有截图足够时不重新制作。
-- 最终文档不用删除线保留被淘汰内容，也不得出现“XX问题已判断”“XX问题已解决”等分析过程字样；若确需变更记录，放在变更日志中，触发条件见写法指南的“按需内容”。
-- 语言表达遵循 [references/语言表述规范.md](references/语言表述规范.md)。
+- 多语言、图片、流程图、存量数据均按需，不默认增加。
+- 最终文档不用删除线保留被淘汰内容，不出现"XX问题已判断""XX问题已解决"等分析过程字样。
+- PRD 正文不含需求/规则/验收编号（如 REQ-01），不含追踪矩阵。
 
 ## 参考文件
 
 | 文件 | 用途 |
 |---|---|
-| [references/input-intake.md](references/input-intake.md) | 输入处理以及观察、原型分流 |
+| [references/input-intake.md](references/input-intake.md) | 输入处理与原型分流 |
 | [references/写法指南.md](references/写法指南.md) | A/B/C 类型的精简写法 |
 | [references/review-checklist.md](references/review-checklist.md) | 核心产品内容审校 |
 | [references/图片嵌入与截图指南.md](references/图片嵌入与截图指南.md) | PRD 中图片的选择、脱敏、路径与排布 |
 | [references/语言表述规范.md](references/语言表述规范.md) | 自然、直接的产品语言 |
 | [references/final-output-hygiene.md](references/final-output-hygiene.md) | 编辑残留和被否方案清理 |
-| [references/browser/observation.md](references/browser/observation.md) | 页面观察的触发条件、流程和纪律 |
-| [references/browser/tool-adapter.md](references/browser/tool-adapter.md) | 宿主浏览器与兼容 CLI 的能力映射 |
-| [references/browser/snapshot-and-interaction.md](references/browser/snapshot-and-interaction.md) | 快照、元素引用和失败恢复 |
-| [references/browser/auth-and-sessions.md](references/browser/auth-and-sessions.md) | 用户登录、会话隔离和清理 |
-| [references/browser/evidence-and-diagnostics.md](references/browser/evidence-and-diagnostics.md) | 截图、控制台和网络诊断 |
-| [references/browser/observation-record.md](references/browser/observation-record.md) | 标准观察记录与交接模板 |
 | [references/prototype/generation.md](references/prototype/generation.md) | HTML 原型生成流程和约束 |
 | [references/prototype/responsive-guide.md](references/prototype/responsive-guide.md) | PC/H5 响应式实现规范 |
-| [references/prototype/site-reference.md](references/prototype/site-reference.md) | 网站观察结果的原创转译与版权边界 |
-| [references/prototype/visual-validation.md](references/prototype/visual-validation.md) | 截图驱动原型的视觉验证步骤、判定与记录格式 |
+| [references/prototype/visual-validation.md](references/prototype/visual-validation.md) | 截图能力判定与视觉验证 |

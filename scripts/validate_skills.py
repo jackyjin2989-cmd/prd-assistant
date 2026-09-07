@@ -15,18 +15,15 @@ REQUIRED = {
         "references/图片嵌入与截图指南.md",
         "references/语言表述规范.md",
         "references/final-output-hygiene.md",
-        "references/browser/observation.md",
-        "references/browser/tool-adapter.md",
-        "references/browser/snapshot-and-interaction.md",
-        "references/browser/auth-and-sessions.md",
-        "references/browser/evidence-and-diagnostics.md",
-        "references/browser/observation-record.md",
         "references/prototype/generation.md",
         "references/prototype/responsive-guide.md",
-        "references/prototype/site-reference.md",
         "references/prototype/visual-validation.md",
     ],
 }
+# browser/ 目录已移除：本 Skill 不访问网站，页面现状由用户提供截图。
+FORBIDDEN_DIRS = [
+    "prd-assistant/references/browser",
+]
 FORBIDDEN = [
     r"TRAE\s+Design",
     r"(?i)(password|passwd|token|cookie)\s*[:=]\s*[^\s]+",
@@ -37,30 +34,33 @@ TEXT_SUFFIXES = {".md", ".txt", ".html", ".js", ".css", ".json", ".yml", ".yaml"
 MARKDOWN_LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 
 PRD_POLICY_MARKERS = [
+    "## 简单需求必须简单写（硬规则）",
+    "篇幅与复杂度匹配",
+    "默认不写以下章节",
+    "验收标准、测试用例、本期不做/范围排除",
     "## 默认内容边界",
     "系统边界",
     "超时、重试、异步",
     "发布、灰度、监控、回滚",
-    "算法、模型和内部策略",
-    "缺陷修复过程",
-    "功能下线",
     "运营后台操作手册",
-    "### 默认不执行页面观察",
-    "### 默认不生成原型",
+    "本 Skill 不访问网站",
+    "请用户提供截图",
+    "## 原型分流",
+    "默认不生成原型",
     "最终文档不用删除线",
-    "核心分歧集中提出最少问题并暂停定稿",
-    "待确认内容不得进入确定性验收",
     "XX问题已判断",
+]
+SKILL_FORBIDDEN_MARKERS = [
+    "### 建议结构",
+    "references/browser",
+    "页面观察",
+    "观察分流",
 ]
 README_POLICY_MARKERS = [
     "聚焦核心产品功能与改动",
-    "观察和原型均不是 PRD 的默认步骤",
-    "图片指南的职责边界与关键规则",
-    "截图模糊、PC/H5 等不单独触发",
-    "核心分歧集中追问并暂停定稿",
-    "支持截图驱动还原",
-    "目标视口视觉验证",
-    "不作为逐像素复制目标",
+    "简单需求必须简单写",
+    "不访问网站",
+    "截图能力判定",
 ]
 IMAGE_GUIDE_REQUIRED_MARKERS = [
     "## 图片选择",
@@ -70,65 +70,60 @@ IMAGE_GUIDE_REQUIRED_MARKERS = [
     "## 图片排布",
     "每张截图必须紧跟对应描述或对应小标题",
     "禁止把各模块截图统一堆到章节末尾或文档末尾",
-    "需要制作或验证 HTML 原型时按 [prototype/generation.md](prototype/generation.md) 执行",
+    "截图能力判定",
 ]
 IMAGE_GUIDE_FORBIDDEN_MARKERS = [
     "Selenium",
-    "截图脚本",
     "## 远程同步",
     "同步到远程",
-    "截图索引",
 ]
-BROWSER_POLICY_MARKERS = [
-    "的“原型与观察分流”为唯一完整定义",
-    "URL、截图模糊或裁切、缺少普通交互状态、PC/H5 差异等均不单独触发观察",
-]
-
 INTAKE_POLICY_MARKERS = [
-    "的“冲突处理”为唯一完整定义",
+    "本 Skill 不访问网站",
+    "不访问 URL",
+    "的\"冲突处理\"为唯一完整定义",
 ]
-SKILL_FORBIDDEN_MARKERS = [
-    "### 建议结构",
+INTAKE_FORBIDDEN_MARKERS = [
+    "browser/",
+    "观察页面 → 写 PRD",
 ]
 PROTOTYPE_POLICY_MARKERS = [
-    "的“原型与观察分流”为唯一完整定义",
-    "信息架构转译、页面实现、交互状态、响应式适配和视觉验证",
-    "不交付或长期维护独立 Selenium 截图脚本 SOP",
+    "的\"原型分流\"为唯一完整定义",
     "确定最小范围",
     "双端支持按需",
-    "完整状态矩阵不作为默认完成条件",
     "不得擅自把截图替换成更熟悉的通用后台",
-    "必须调用 [visual-validation.md](visual-validation.md)",
+    "截图能力判定",
+]
+PROTOTYPE_FORBIDDEN_MARKERS = [
+    "site-reference.md",
+    "观察记录",
+]
+RESPONSIVE_REQUIRED_MARKERS = [
+    "以目标材料为准",
+    "内容重排，不是缩放",
 ]
 RESPONSIVE_FORBIDDEN_MARKERS = [
     "原型必须同时支持 PC 和 H5",
     "核心功能在两个端都可用",
-    "PC 和 H5 两端必须保持",
-]
-VISUAL_FORBIDDEN_MARKERS = [
-    "建议矩阵",
-    "最小状态",
 ]
 VISUAL_REQUIRED_MARKERS = [
-    "截图驱动的最低验证",
-    "环境支持渲染和截图时",
-    "环境支持渲染但不能截图时",
-    "环境不能渲染时",
-    "最终结论：通过 / 受限 / 未完成",
+    "## 截图能力判定（先读这一节）",
+    "禁止安装浏览器、驱动、npm/pip 包或任何依赖",
+    "禁止编写、调试截图脚本",
+    "禁止对同一失败重试超过 1 次",
+    "判定只做一次",
     "不作为逐像素复制目标",
 ]
 REVIEW_REQUIRED_MARKERS = [
     "截图驱动原型是否先识别界面身份",
-    "记录结论为“通过 / 受限 / 未完成”",
+    "通过 / 受限 / 未完成",
+    "是否出现了用户未要求的验收标准、本期不做",
 ]
-RESPONSIVE_REQUIRED_MARKERS = [
-    "以目标材料为准",
-    "不得为了套用通用模式",
+PRD_WRITING_REQUIRED_MARKERS = [
+    "简单需求必须简单写",
+    "| 验收标准 | 仅用户明确要求时 |",
+    "硬性上限",
 ]
 RUNTIME_BASE = ROOT.parent / ".trae" / "skills"
-PRD_WRITING_REQUIRED_MARKERS = [
-    "成功判定（按需）",
-]
 
 
 def parse_target(raw: str) -> str | None:
@@ -181,6 +176,10 @@ def check_skill(name: str, references: list[str]) -> list[str]:
         if not (folder / relative).is_file():
             errors.append(f"{name}: 缺少引用 {relative}")
 
+    for forbidden_dir in FORBIDDEN_DIRS:
+        if (ROOT / forbidden_dir).exists():
+            errors.append(f"不应存在已移除目录 {forbidden_dir}")
+
     return errors
 
 
@@ -218,15 +217,17 @@ def main() -> int:
     image_guide = prd_root / "references" / "图片嵌入与截图指南.md"
     errors.extend(check_markers(image_guide, IMAGE_GUIDE_REQUIRED_MARKERS))
     errors.extend(check_forbidden_markers(image_guide, IMAGE_GUIDE_FORBIDDEN_MARKERS))
-    errors.extend(check_markers(prd_root / "references" / "browser" / "observation.md", BROWSER_POLICY_MARKERS))
-    errors.extend(check_markers(prd_root / "references" / "prototype" / "generation.md", PROTOTYPE_POLICY_MARKERS))
-    errors.extend(check_markers(prd_root / "references" / "input-intake.md", INTAKE_POLICY_MARKERS))
+    intake = prd_root / "references" / "input-intake.md"
+    errors.extend(check_markers(intake, INTAKE_POLICY_MARKERS))
+    errors.extend(check_forbidden_markers(intake, INTAKE_FORBIDDEN_MARKERS))
+    generation = prd_root / "references" / "prototype" / "generation.md"
+    errors.extend(check_markers(generation, PROTOTYPE_POLICY_MARKERS))
+    errors.extend(check_forbidden_markers(generation, PROTOTYPE_FORBIDDEN_MARKERS))
 
     responsive_guide = prd_root / "references" / "prototype" / "responsive-guide.md"
     errors.extend(check_forbidden_markers(responsive_guide, RESPONSIVE_FORBIDDEN_MARKERS))
     errors.extend(check_markers(responsive_guide, RESPONSIVE_REQUIRED_MARKERS))
     visual_validation = prd_root / "references" / "prototype" / "visual-validation.md"
-    errors.extend(check_forbidden_markers(visual_validation, VISUAL_FORBIDDEN_MARKERS))
     errors.extend(check_markers(visual_validation, VISUAL_REQUIRED_MARKERS))
     review_checklist = prd_root / "references" / "review-checklist.md"
     errors.extend(check_markers(review_checklist, REVIEW_REQUIRED_MARKERS))
@@ -239,6 +240,8 @@ def main() -> int:
         if path.suffix.lower() not in TEXT_SUFFIXES:
             continue
         text = path.read_text(encoding="utf-8", errors="replace")
+        if "\ufffd" in text:
+            errors.append(f"{path.relative_to(ROOT)} 含无效编码字符 (U+FFFD)")
         if path.suffix.lower() == ".md":
             errors.extend(check_markdown_links(path, text))
         for pattern in FORBIDDEN:
@@ -275,10 +278,10 @@ def main() -> int:
 
     runtime_note = "并核对了运行版文件一致性。" if runtime_checked else "未找到运行版目录，已跳过运行版一致性核对。"
     print(
-        f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、全部必需参考文件（含 browser/ 和 prototype/ 子目录）、"
-        "非图片 Markdown 链接（图片目标未检查）、基础敏感文本模式、PRD 内容边界与观察/原型分流，"
-        "图片指南职责边界、最小追问闭环、页面观察收窄触发、原型最小范围与截图驱动还原，"
-        f"responsive-guide 目标材料优先、visual-validation 三态结论与审校闭环，写法指南含成功判定规则；{runtime_note}"
+        f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、全部必需参考文件、"
+        "非图片 Markdown 链接、编码完整性、基础敏感文本模式、简单需求简单写与默认内容边界、"
+        "不访问网站与原型分流、截图能力判定与降级规则、"
+        f"responsive-guide 目标材料优先、审校清单闭环；{runtime_note}"
     )
     return 0
 
