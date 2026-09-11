@@ -1,6 +1,7 @@
 # PRD Assistant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/jackyjin2989-cmd/prd-assistant/releases/tag/v1.0.0)
 [![validate](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml/badge.svg)](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml)
 [![GitHub stars](https://img.shields.io/github/stars/jackyjin2989-cmd/prd-assistant?style=social)](https://github.com/jackyjin2989-cmd/prd-assistant/stargazers)
 
