@@ -21,3 +21,6 @@ jobs:
 
       - name: 校验技能仓库结构与策略标记
         run: python scripts/validate_skills.py
+
+      - name: 扫描脚本自测
+        run: python scripts/test_scan_prd.py
