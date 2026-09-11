@@ -5,6 +5,11 @@
 
 一个面向产品经理的可复用 Skill：从文字、截图、会议纪要或已有草稿中起草、补全和审校 PRD，聚焦核心产品功能与改动；用户明确要求时制作自包含 HTML 原型。
 
+仓库内含两个技能，职责分开、互不重复：
+
+- **`prd-assistant`** —— 写与审校 PRD（本 README 的主体）。
+- **`html-prototype-screenshot`** —— 在 macOS 上用无头 Edge 渲染本地 HTML 并截图、量尺寸。`prd-assistant` 只定义「能不能截、什么算通过」，具体命令与参数归它管。
+
 ## 特性
 
 **PRD 写作**
@@ -99,8 +104,11 @@ Copy-Item -Recurse prd-assistant\prd-assistant <宿主技能目录>\prd-assistan
 │           ├── generation.md
 │           ├── responsive-guide.md
 │           └── visual-validation.md
+├── html-prototype-screenshot/
+│   └── SKILL.md
 └── scripts/
-    └── validate_skills.py
+    ├── validate_skills.py
+    └── scan_prd.py
 ```
 
 ## 设计原则
@@ -120,6 +128,23 @@ Copy-Item -Recurse prd-assistant\prd-assistant <宿主技能目录>\prd-assistan
 ```
 python scripts/validate_skills.py
 ```
+
+检查目录与 frontmatter、必需参考文件、非图片 Markdown 链接、编码完整性、基础敏感文本模式，以及各文件的策略标记（防止核心规则被静默删掉）。同时核对运行版技能目录与仓库版是否一致：优先读 `SKILLS_DIR` 环境变量，其次 `~/.workbuddy/skills`、`~/.trae/skills`、`<仓库父目录>/.trae/skills`；运行版是指向本仓库的软链时直接判定一致。
+
+推送到 main 或提 PR 时由 GitHub Actions 自动执行（见 `.github/workflows/validate.yml`）。
+
+### 扫 PRD（交付前收尾）
+
+`validate_skills.py` 管的是技能仓库自身；产出的 PRD 用另一个脚本扫：
+
+```
+python scripts/scan_prd.py <PRD 文件或目录>
+python scripts/scan_prd.py --strict <路径>     # 待人工确认项也按失败处理
+```
+
+检查内容：范围排除与迭代痕迹残留词、图片引用是否存在/是否用绝对路径/是否缺 alt/编号是否连续、同目录未被任何文档引用的图片、相对链接可达性、占位残留（TODO/待补图/截图占位）、编码损坏。
+
+输出分两级：**❌ 错误**（引用失效、绝对路径、占位残留等，退出码 1）与 **⚠️ 待人工确认**（如「本期不做」可能是合规硬约束，需人判断）。注意这个脚本面向 PRD，不要拿它扫技能自身的文档 —— 技能文档里出现这类字样是正常的策略描述。
 
 脚本检查 Skill 目录与 frontmatter、全部必需参考文件、仓库内非图片 Markdown 链接、编码完整性、基础敏感文本模式、"简单需求简单写"与内容边界规则、不访问网站与原型分流规则、截图能力判定与降级规则，并核对运行版与仓库版文件一致性。脚本不替代人工语义审查。
 

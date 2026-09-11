@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -20,6 +21,7 @@ REQUIRED = {
         "references/prototype/responsive-guide.md",
         "references/prototype/visual-validation.md",
     ],
+    "html-prototype-screenshot": [],
 }
 # browser/ 目录已移除：本 Skill 不访问网站，页面现状由用户提供截图。
 FORBIDDEN_DIRS = [
@@ -73,8 +75,10 @@ IMAGE_GUIDE_REQUIRED_MARKERS = [
     "## 脱敏",
     "## 相对路径与存在性",
     "## 图片排布",
+    "## 多图横排",
     "每张截图必须紧跟对应描述或对应小标题",
     "禁止把各模块截图统一堆到章节末尾或文档末尾",
+    "截图内容必须与正文口径一致",
     "截图能力判定",
 ]
 IMAGE_GUIDE_FORBIDDEN_MARKERS = [
@@ -154,7 +158,24 @@ EXAMPLES_REQUIRED_MARKERS = [
     "## B 类结构示例",
     "## AI 味对照",
 ]
-RUNTIME_BASE = ROOT.parent / ".trae" / "skills"
+SCREENSHOT_REQUIRED_MARKERS = [
+    "## 与 prd-assistant 的分工",
+    "--headless=old",
+    "--dump-dom",
+    "截图内容必须与文档口径一致",
+]
+SCREENSHOT_FORBIDDEN_MARKERS = [
+    "## 环境能不能截图的判定",
+    "比对顺序",
+    "通过 / 受限 / 未完成",
+]
+# 运行版技能目录候选：环境变量优先，其次各宿主约定目录。命中第一个存在的即用它。
+RUNTIME_CANDIDATES = [
+    *([Path(os.environ["SKILLS_DIR"]).expanduser()] if os.environ.get("SKILLS_DIR") else []),
+    Path.home() / ".workbuddy" / "skills",
+    Path.home() / ".trae" / "skills",
+    ROOT.parent / ".trae" / "skills",
+]
 
 
 def parse_target(raw: str) -> str | None:
@@ -273,6 +294,10 @@ def main() -> int:
     examples = prd_root / "references" / "示例.md"
     errors.extend(check_markers(examples, EXAMPLES_REQUIRED_MARKERS))
 
+    screenshot_skill = ROOT / "html-prototype-screenshot" / "SKILL.md"
+    errors.extend(check_markers(screenshot_skill, SCREENSHOT_REQUIRED_MARKERS))
+    errors.extend(check_forbidden_markers(screenshot_skill, SCREENSHOT_FORBIDDEN_MARKERS))
+
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".git" in path.parts or path.name == "validate_skills.py":
             continue
@@ -287,27 +312,38 @@ def main() -> int:
             if re.search(pattern, text):
                 errors.append(f"{path.relative_to(ROOT)} 命中禁止模式: {pattern}")
 
-    runtime_checked = RUNTIME_BASE.is_dir()
-    if runtime_checked:
+    runtime_base = next((c for c in RUNTIME_CANDIDATES if c.is_dir()), None)
+    if runtime_base is None:
+        runtime_note = (
+            "未找到运行版技能目录，已跳过运行版一致性核对（探测过："
+            + "、".join(str(c) for c in RUNTIME_CANDIDATES)
+            + "；可用 SKILLS_DIR 环境变量指定）。"
+        )
+    else:
+        linked: list[str] = []
         for skill_name, refs in REQUIRED.items():
-            runtime_skill = RUNTIME_BASE / skill_name
-            if not runtime_skill.is_dir():
+            runtime_skill = runtime_base / skill_name
+            repo_skill = (ROOT / skill_name).resolve()
+            if not runtime_skill.exists() and not runtime_skill.is_symlink():
                 continue
-            runtime_skill_file = runtime_skill / "SKILL.md"
-            repo_skill_file = ROOT / skill_name / "SKILL.md"
-            if runtime_skill_file.is_file() and repo_skill_file.is_file():
-                if (runtime_skill_file.read_bytes()) != (repo_skill_file.read_bytes()):
-                    errors.append(f"运行版 {skill_name}/SKILL.md 与仓库版不一致")
-            elif not runtime_skill_file.is_file() and repo_skill_file.is_file():
-                errors.append(f"运行版缺少 {skill_name}/SKILL.md")
-            for ref in refs:
-                runtime_ref = runtime_skill / ref
-                repo_ref = ROOT / skill_name / ref
+            # 运行版是指向本仓库的软链 -> 同一份文件，天然一致，不做逐字节比对
+            if runtime_skill.is_symlink() and Path(os.path.realpath(runtime_skill)) == repo_skill:
+                linked.append(skill_name)
+                continue
+            for relative in ["SKILL.md", *refs]:
+                runtime_ref = runtime_skill / relative
+                repo_ref = ROOT / skill_name / relative
                 if runtime_ref.is_file() and repo_ref.is_file():
                     if runtime_ref.read_bytes() != repo_ref.read_bytes():
-                        errors.append(f"运行版 {skill_name}/{ref} 与仓库版不一致")
-                elif not runtime_ref.is_file() and repo_ref.is_file():
-                    errors.append(f"运行版缺少 {skill_name}/{ref}")
+                        errors.append(f"运行版 {skill_name}/{relative} 与仓库版不一致")
+                elif repo_ref.is_file():
+                    errors.append(f"运行版缺少 {skill_name}/{relative}")
+        runtime_note = f"已核对运行版目录 {runtime_base}"
+        runtime_note += (
+            f"（{len(linked)} 个技能为指向本仓库的软链，直接判定一致）。"
+            if linked
+            else "。"
+        )
 
     if errors:
         print("验证失败：")
@@ -315,7 +351,6 @@ def main() -> int:
             print(f"- {error}")
         return 1
 
-    runtime_note = "并核对了运行版文件一致性。" if runtime_checked else "未找到运行版目录，已跳过运行版一致性核对。"
     print(
         f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、全部必需参考文件、"
         "非图片 Markdown 链接、编码完整性、基础敏感文本模式、简单需求简单写与默认内容边界、"

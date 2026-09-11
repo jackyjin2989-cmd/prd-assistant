@@ -1,0 +1,23 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: 脚本语法检查
+        run: python -m py_compile scripts/validate_skills.py scripts/scan_prd.py
+
+      - name: 校验技能仓库结构与策略标记
+        run: python scripts/validate_skills.py
