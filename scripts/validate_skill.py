@@ -175,6 +175,7 @@ SCREENSHOT_FORBIDDEN_MARKERS = [
 # 运行版技能目录候选：环境变量优先，其次各宿主约定目录。命中第一个存在的即用它。
 RUNTIME_CANDIDATES = [
     *([Path(os.environ["SKILLS_DIR"]).expanduser()] if os.environ.get("SKILLS_DIR") else []),
+    Path.home() / ".workbuddy-ai" / "skills",
     Path.home() / ".workbuddy" / "skills",
     Path.home() / ".trae" / "skills",
     ROOT.parent / ".trae" / "skills",
