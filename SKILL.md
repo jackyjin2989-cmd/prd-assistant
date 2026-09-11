@@ -1,6 +1,6 @@
 ---
 name: prd-assistant
-description: 为产品经理按需求复杂度起草、补全和审校聚焦核心产品功能与改动的 PRD；用户明确要求时制作自包含 HTML 原型。用户要求写、改、整理、评审 PRD 或制作页面原型时调用。本技能只写文档与原型，不负责渲染截图（交给宿主截图技能）。
+description: 为产品经理按需求复杂度起草、补全和审校聚焦核心产品功能与改动的 PRD；用户明确要求时制作自包含 HTML 原型并截图做视觉验证。用户要求写、改、整理、评审 PRD，或制作、截图页面原型时调用。
 ---
 
 # PRD Assistant
@@ -91,7 +91,7 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 4. 依据"简单需求必须简单写"和"默认内容边界"裁剪；用户明确要求的例外单独纳入。
 5. 按 [references/边界扫描清单.md](references/边界扫描清单.md) 内部扫描本次改动的流程与逻辑缺口；命中的问题写进对应章节或待确认项，扫描过程不输出。
 6. 核心分歧按"最小追问闭环"处理。
-7. PRD 按 [references/写法指南.md](references/写法指南.md) 起草；原型按 [references/prototype/generation.md](references/prototype/generation.md) 实现，截图与视觉验证遵守 [references/prototype/visual-validation.md](references/prototype/visual-validation.md) 的能力判定。
+7. PRD 按 [references/写法指南.md](references/写法指南.md) 起草；原型按 [references/prototype/generation.md](references/prototype/generation.md) 实现，截图与视觉验证先按 [references/prototype/visual-validation.md](references/prototype/visual-validation.md) 判定能力与通过标准，具体命令与参数见 [references/prototype/screenshot-tooling.md](references/prototype/screenshot-tooling.md)。
 8. 用 [references/review-checklist.md](references/review-checklist.md) 审校闭环、矛盾和重复，并按其中的"编辑残留与最终交付"清理后交付。
 
 若用户要求直接修改已有文档或仓库，且目标与改动明确，直接执行，不默认增加"先给计划、等待确认"的往返。
@@ -142,4 +142,5 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 | [references/语言表述规范.md](references/语言表述规范.md) | 自然、直接的产品语言 |
 | [references/prototype/generation.md](references/prototype/generation.md) | HTML 原型生成流程和约束 |
 | [references/prototype/responsive-guide.md](references/prototype/responsive-guide.md) | PC/H5 响应式实现规范 |
-| [references/prototype/visual-validation.md](references/prototype/visual-validation.md) | 截图能力判定与视觉验证 |
+| [references/prototype/visual-validation.md](references/prototype/visual-validation.md) | 判定标准：能不能截图、什么算通过、结论怎么写 |
+| [references/prototype/screenshot-tooling.md](references/prototype/screenshot-tooling.md) | 执行手册：无头 Edge 截图与量尺寸的具体命令、参数、批量脚本 |

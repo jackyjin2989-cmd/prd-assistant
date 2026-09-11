@@ -1,29 +1,33 @@
 # PRD Assistant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/jackyjin2989-cmd/prd-assistant/releases/tag/v1.0.0)
+[![version](https://img.shields.io/badge/version-v2.0.0-blue.svg)](https://github.com/jackyjin2989-cmd/prd-assistant/releases/tag/v2.0.0)
 [![validate](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml/badge.svg)](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml)
 [![GitHub stars](https://img.shields.io/github/stars/jackyjin2989-cmd/prd-assistant?style=social)](https://github.com/jackyjin2989-cmd/prd-assistant/stargazers)
 
-一个面向产品经理的可复用 Skill：从文字、截图、会议纪要或已有草稿中起草、补全和审校 PRD，聚焦核心产品功能与改动；用户明确要求时制作自包含 HTML 原型。
+一个面向产品经理的可复用 Skill：从文字、截图、会议纪要或已有草稿中起草、补全和审校 PRD，聚焦核心产品功能与改动；用户明确要求时制作自包含 HTML 原型，并用无头浏览器截图做视觉验证。
 
 ## 仓库里有什么
 
-本仓库是一个**技能集合**（monorepo）：两个可独立安装的技能 + 一套仓库级工具链。仓库名沿用了第一个技能的名字，所以会出现 `prd-assistant/prd-assistant/` 这样的双层同名路径 —— 前一层是仓库，后一层是技能目录。
+这个仓库就是**这一个技能**（单技能仓库，不是技能集合）：仓库根即技能根，`SKILL.md` 与 `references/` 直接放在根目录下。
 
-| 顶层目录 | 是什么 | 归属 |
+| 路径 | 是什么 | 归属 |
 |---|---|---|
-| `prd-assistant/` | 技能一：起草与审校 PRD、定义原型规范与视觉判定 | 技能，可独立安装 |
-| `html-prototype-screenshot/` | 技能二：渲染本地 HTML、截图与量尺寸 | 技能，可独立安装（通用，与 PRD 无关） |
-| `scripts/` | 仓库级工具链：技能仓库校验、PRD 扫描、扫描自测 | 基础设施，不随技能安装 |
-| `.github/workflows/` | CI：push / PR 时自动跑语法检查与上述校验 | 基础设施 |
+| `SKILL.md` | 技能入口：适用范围、硬规则、工作流程 | 技能 |
+| `references/` | 写作与审校规则、原型规范、截图手册 | 技能 |
+| `scripts/` | 配套工具：技能校验、PRD 扫描、扫描自测 | 技能的配套工具，随技能一起安装 |
+| `.github/workflows/` | CI：push / PR 时自动跑语法检查与上述校验 | 仓库基础设施 |
 
-两个技能职责分开、互不重复：
+原型与截图能力都归这个技能，只是分层摆放、各管一段，不要互相抄：
 
-- **`prd-assistant`** —— 写与审校 PRD（本 README 的主体）。
-- **`html-prototype-screenshot`** —— 在 macOS 上用无头 Edge 渲染本地 HTML 并截图、量尺寸。`prd-assistant` 只定义「能不能截、什么算通过」，具体命令与参数归它管。
+| 管什么 | 在哪 |
+|---|---|
+| 原型怎么搭（结构、状态、交付形态） | `references/prototype/generation.md` |
+| **能不能截图、什么算通过**、结论怎么写 | `references/prototype/visual-validation.md` |
+| **怎么截、怎么量**（命令、参数、探针、批量脚本） | `references/prototype/screenshot-tooling.md` |
+| 截图与正文是否一致、图片怎么选怎么排 | `references/图片嵌入与截图指南.md` |
 
-一条规则只写一份：**能不能截、什么算通过、截图与正文是否一致** 归 `prd-assistant`；**怎么截、怎么量** 归 `html-prototype-screenshot`。`scripts/validate_skills.py` 用标记双向锁住这条分工，任一侧越界都会校验失败。
+**一处定义**：同一规则只完整写一次，其他文件引用。`scripts/validate_skills.py` 用 REQUIRED / FORBIDDEN 标记锁住这条分工（例如「截图内容必须与正文口径一致」只在图片嵌入指南里定义，截图手册里出现即校验失败）。
 
 ## 特性
 
@@ -45,6 +49,7 @@
 - 支持截图驱动还原：先识别页面骨架、组件形态、内容密度和视觉令牌，再实现交互，禁止直接套用通用模板
 - **截图能力判定**：截图前一次性判定环境能力，不可截图立即降级为代码层自查，禁止安装依赖、调试脚本或反复重试
 - **浮层与量化校验**：日历、下拉等"点击外部关闭"组件的通用坑位提示；折行、溢出、浮层几何用测量定稿，不靠目测猜字号
+- **截图执行手册**：macOS 无头 Edge 的命令与参数、滚动与切页的探针注入、局部放大、批量截多页/弹窗，以及三个会让 CSS 静默失效的坑
 - PC / H5 响应式按需执行
 
 **不访问网站**
@@ -57,12 +62,12 @@
 
 **方式一：复制安装**（只用不改）
 
-把技能目录复制到宿主约定的技能目录，保留 `SKILL.md` 与 `references/` 结构即可：
+克隆后把仓库根目录整个复制到宿主约定的技能目录即可 —— 仓库根就是技能根，`SKILL.md` 与 `references/` 就在根下：
 
 ```
 git clone https://github.com/jackyjin2989-cmd/prd-assistant.git
-Copy-Item -Recurse prd-assistant\prd-assistant <宿主技能目录>\prd-assistant
-Copy-Item -Recurse prd-assistant\html-prototype-screenshot <宿主技能目录>\html-prototype-screenshot
+mkdir <宿主技能目录>\prd-assistant
+Copy-Item -Recurse prd-assistant\* <宿主技能目录>\prd-assistant\
 ```
 
 **方式二：开发模式（软链，改完即生效）**
@@ -79,16 +84,16 @@ git clone git@github.com:jackyjin2989-cmd/prd-assistant.git ~/WorkBuddy/prd-assi
 mkdir -p ~/.workbuddy/backups/skills
 mv ~/.workbuddy/skills/prd-assistant ~/.workbuddy/backups/skills/prd-assistant-$(date +%Y%m%d-%H%M)
 
-# 3. 建软链（Windows 无权限时改用 junction：cmd /c mklink /J <链接> <目标>）
-ln -s ~/WorkBuddy/prd-assistant/prd-assistant ~/.workbuddy/skills/prd-assistant
+# 3. 建软链：指向仓库根，不是子目录（Windows 无权限时用 junction：cmd /c mklink /J <链接> <目标>）
+ln -s ~/WorkBuddy/prd-assistant ~/.workbuddy/skills/prd-assistant
 
 # 4. 验证（find 必须加 -L，否则统计不到软链下的文件）
 ls -la ~/.workbuddy/skills | grep prd-assistant
-find -L ~/.workbuddy/skills/prd-assistant -type f | wc -l
+find -L ~/.workbuddy/skills/prd-assistant -type f ! -path '*/.git/*' | wc -l
 head -3 ~/.workbuddy/skills/prd-assistant/SKILL.md
 ```
 
-第二个技能 `html-prototype-screenshot` 同样处理。回滚：删掉软链，把备份 `mv` 回原位。
+回滚：删掉软链，把备份 `mv` 回原位。
 
 日常流程：**改前先 `git pull`，改完立即 commit + push，同一时间只让一个 agent 改这个仓库**（多个 agent 通常软链到同一个克隆，同时改会互相覆盖工作区）。推送前跑 `python scripts/validate_skills.py`。
 
@@ -97,8 +102,11 @@ head -3 ~/.workbuddy/skills/prd-assistant/SKILL.md
 ```
 <宿主技能目录>/prd-assistant/
 ├── SKILL.md
-└── references/
-    └── prototype/    # HTML 原型规则
+├── references/
+│   └── prototype/         # 原型生成 + 响应式 + 视觉判定 + 截图手册
+├── scripts/               # 校验与扫描工具（可选，随技能一起复制）
+├── README.md
+└── LICENSE
 ```
 
 ### 使用
@@ -135,25 +143,27 @@ head -3 ~/.workbuddy/skills/prd-assistant/SKILL.md
 ## 目录
 
 ```
-├── prd-assistant/
-│   ├── SKILL.md
-│   └── references/
-│       ├── input-intake.md
-│       ├── 写法指南.md
-│       ├── 边界扫描清单.md
-│       ├── 示例.md
-│       ├── review-checklist.md
-│       ├── 图片嵌入与截图指南.md
-│       ├── 语言表述规范.md
-│       └── prototype/
-│           ├── generation.md
-│           ├── responsive-guide.md
-│           └── visual-validation.md
-├── html-prototype-screenshot/
-│   └── SKILL.md
-└── scripts/
-    ├── validate_skills.py
-    └── scan_prd.py
+├── SKILL.md
+├── references/
+│   ├── input-intake.md
+│   ├── 写法指南.md
+│   ├── 边界扫描清单.md
+│   ├── 示例.md
+│   ├── review-checklist.md
+│   ├── 图片嵌入与截图指南.md
+│   ├── 语言表述规范.md
+│   └── prototype/
+│       ├── generation.md            # 原型怎么搭
+│       ├── responsive-guide.md      # PC / H5 响应式
+│       ├── visual-validation.md     # 能不能截、什么算通过
+│       └── screenshot-tooling.md    # 怎么截、怎么量
+├── scripts/
+│   ├── validate_skills.py
+│   ├── scan_prd.py
+│   └── test_scan_prd.py
+├── README.md
+├── LICENSE
+└── .github/workflows/validate.yml
 ```
 
 ## 设计原则

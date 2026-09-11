@@ -107,4 +107,4 @@
 |------|------|
 | [responsive-guide.md](responsive-guide.md) | PC/H5 响应式实现规范 |
 | [visual-validation.md](visual-validation.md) | 截图能力判定与视觉验证（判定标准，不含命令） |
-| 宿主截图技能（如 `html-prototype-screenshot`） | 截图与量尺寸的具体命令、参数、探针写法和批量脚本 |
+| [screenshot-tooling.md](screenshot-tooling.md) | 截图与量尺寸的具体命令、参数、探针写法和批量脚本 |

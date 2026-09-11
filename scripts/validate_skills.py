@@ -7,29 +7,28 @@ from pathlib import Path
 from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILLS = ROOT
-REQUIRED = {
-    "prd-assistant": [
-        "references/input-intake.md",
-        "references/写法指南.md",
-        "references/边界扫描清单.md",
-        "references/示例.md",
-        "references/review-checklist.md",
-        "references/图片嵌入与截图指南.md",
-        "references/语言表述规范.md",
-        "references/prototype/generation.md",
-        "references/prototype/responsive-guide.md",
-        "references/prototype/visual-validation.md",
-    ],
-    "html-prototype-screenshot": [],
-}
+# 单技能仓库：仓库根就是技能根，SKILL.md 与 references/ 直接放在仓库根下。
+SKILL_NAME = "prd-assistant"
+REQUIRED = [
+    "references/input-intake.md",
+    "references/写法指南.md",
+    "references/边界扫描清单.md",
+    "references/示例.md",
+    "references/review-checklist.md",
+    "references/图片嵌入与截图指南.md",
+    "references/语言表述规范.md",
+    "references/prototype/generation.md",
+    "references/prototype/responsive-guide.md",
+    "references/prototype/visual-validation.md",
+    "references/prototype/screenshot-tooling.md",
+]
 # browser/ 目录已移除：本 Skill 不访问网站，页面现状由用户提供截图。
 FORBIDDEN_DIRS = [
-    "prd-assistant/references/browser",
+    "references/browser",
 ]
 # final-output-hygiene.md 已并入 review-checklist.md（审校与交付清理）。
 FORBIDDEN_FILES = [
-    "prd-assistant/references/final-output-hygiene.md",
+    "references/final-output-hygiene.md",
 ]
 FORBIDDEN = [
     r"TRAE\s+Design",
@@ -160,13 +159,13 @@ EXAMPLES_REQUIRED_MARKERS = [
     "## AI 味对照",
 ]
 SCREENSHOT_REQUIRED_MARKERS = [
-    "## 与 prd-assistant 的分工",
+    "## 与判定标准的分工",
     "--headless=old",
     "--dump-dom",
     "按文档所述状态取图",
 ]
-# 「口径一致」这条规则只在 prd-assistant 的图片嵌入指南里定义一份，
-# 截图技能引用它即可；出现即视为职责复制。
+# 「口径一致」这条规则只在 references/图片嵌入与截图指南.md 里定义一份，
+# 截图执行手册引用它即可；出现即视为职责复制。
 SCREENSHOT_FORBIDDEN_MARKERS = [
     "## 环境能不能截图的判定",
     "比对顺序",
@@ -206,31 +205,30 @@ def check_markdown_links(path: Path, text: str) -> list[str]:
     return errors
 
 
-def check_skill(name: str, references: list[str]) -> list[str]:
+def check_skill() -> list[str]:
     errors: list[str] = []
-    folder = SKILLS / name
-    skill_file = folder / "SKILL.md"
+    skill_file = ROOT / "SKILL.md"
     if not skill_file.is_file():
-        return [f"缺少 {skill_file.relative_to(ROOT)}"]
+        return ["缺少 SKILL.md"]
 
     text = skill_file.read_text(encoding="utf-8")
     match = re.match(r"^---\n(.*?)\n---\n", text, re.DOTALL)
     if not match:
-        errors.append(f"{name}: frontmatter 缺失或格式错误")
+        errors.append("SKILL.md: frontmatter 缺失或格式错误")
     else:
         frontmatter = match.group(1)
         name_value = re.search(r"^name:\s*(.+?)\s*$", frontmatter, re.MULTILINE)
-        if not name_value or name_value.group(1).strip().strip('"').strip("'") != name:
-            errors.append(f"{name}: name 与目录名不一致")
+        if not name_value or name_value.group(1).strip().strip('"').strip("'") != SKILL_NAME:
+            errors.append(f"SKILL.md: name 与预期技能名 {SKILL_NAME} 不一致")
         description = re.search(r"^description:\s*(.+?)\s*$", frontmatter, re.MULTILINE)
         if not description:
-            errors.append(f"{name}: description 缺失")
+            errors.append("SKILL.md: description 缺失")
         elif len(description.group(1).strip().strip('"').strip("'")) > 200:
-            errors.append(f"{name}: description 超过 200 字符")
+            errors.append("SKILL.md: description 超过 200 字符")
 
-    for relative in references:
-        if not (folder / relative).is_file():
-            errors.append(f"{name}: 缺少引用 {relative}")
+    for relative in REQUIRED:
+        if not (ROOT / relative).is_file():
+            errors.append(f"缺少引用 {relative}")
 
     for forbidden_dir in FORBIDDEN_DIRS:
         if (ROOT / forbidden_dir).exists():
@@ -267,40 +265,39 @@ def check_forbidden_markers(path: Path, markers: list[str]) -> list[str]:
 
 def main() -> int:
     errors: list[str] = []
-    for name, references in REQUIRED.items():
-        errors.extend(check_skill(name, references))
+    errors.extend(check_skill())
 
-    prd_root = ROOT / "prd-assistant"
-    errors.extend(check_markers(prd_root / "SKILL.md", PRD_POLICY_MARKERS))
-    errors.extend(check_forbidden_markers(prd_root / "SKILL.md", SKILL_FORBIDDEN_MARKERS))
+    skill_root = ROOT  # 单技能仓库：仓库根就是技能根
+    errors.extend(check_markers(skill_root / "SKILL.md", PRD_POLICY_MARKERS))
+    errors.extend(check_forbidden_markers(skill_root / "SKILL.md", SKILL_FORBIDDEN_MARKERS))
     errors.extend(check_markers(ROOT / "README.md", README_POLICY_MARKERS))
-    image_guide = prd_root / "references" / "图片嵌入与截图指南.md"
+    image_guide = skill_root / "references" / "图片嵌入与截图指南.md"
     errors.extend(check_markers(image_guide, IMAGE_GUIDE_REQUIRED_MARKERS))
     errors.extend(check_forbidden_markers(image_guide, IMAGE_GUIDE_FORBIDDEN_MARKERS))
-    intake = prd_root / "references" / "input-intake.md"
+    intake = skill_root / "references" / "input-intake.md"
     errors.extend(check_markers(intake, INTAKE_POLICY_MARKERS))
     errors.extend(check_forbidden_markers(intake, INTAKE_FORBIDDEN_MARKERS))
-    generation = prd_root / "references" / "prototype" / "generation.md"
+    generation = skill_root / "references" / "prototype" / "generation.md"
     errors.extend(check_markers(generation, PROTOTYPE_POLICY_MARKERS))
     errors.extend(check_forbidden_markers(generation, PROTOTYPE_FORBIDDEN_MARKERS))
 
-    responsive_guide = prd_root / "references" / "prototype" / "responsive-guide.md"
+    responsive_guide = skill_root / "references" / "prototype" / "responsive-guide.md"
     errors.extend(check_forbidden_markers(responsive_guide, RESPONSIVE_FORBIDDEN_MARKERS))
     errors.extend(check_markers(responsive_guide, RESPONSIVE_REQUIRED_MARKERS))
-    visual_validation = prd_root / "references" / "prototype" / "visual-validation.md"
+    visual_validation = skill_root / "references" / "prototype" / "visual-validation.md"
     errors.extend(check_markers(visual_validation, VISUAL_REQUIRED_MARKERS))
-    review_checklist = prd_root / "references" / "review-checklist.md"
+    review_checklist = skill_root / "references" / "review-checklist.md"
     errors.extend(check_markers(review_checklist, REVIEW_REQUIRED_MARKERS))
-    writing_guide = prd_root / "references" / "写法指南.md"
+    writing_guide = skill_root / "references" / "写法指南.md"
     errors.extend(check_markers(writing_guide, PRD_WRITING_REQUIRED_MARKERS))
-    boundary_scan = prd_root / "references" / "边界扫描清单.md"
+    boundary_scan = skill_root / "references" / "边界扫描清单.md"
     errors.extend(check_markers(boundary_scan, BOUNDARY_SCAN_REQUIRED_MARKERS))
-    examples = prd_root / "references" / "示例.md"
+    examples = skill_root / "references" / "示例.md"
     errors.extend(check_markers(examples, EXAMPLES_REQUIRED_MARKERS))
 
-    screenshot_skill = ROOT / "html-prototype-screenshot" / "SKILL.md"
-    errors.extend(check_markers(screenshot_skill, SCREENSHOT_REQUIRED_MARKERS))
-    errors.extend(check_forbidden_markers(screenshot_skill, SCREENSHOT_FORBIDDEN_MARKERS))
+    screenshot_tooling = skill_root / "references" / "prototype" / "screenshot-tooling.md"
+    errors.extend(check_markers(screenshot_tooling, SCREENSHOT_REQUIRED_MARKERS))
+    errors.extend(check_forbidden_markers(screenshot_tooling, SCREENSHOT_FORBIDDEN_MARKERS))
 
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".git" in path.parts or path.name == "validate_skills.py":
@@ -324,30 +321,27 @@ def main() -> int:
             + "；可用 SKILLS_DIR 环境变量指定）。"
         )
     else:
-        linked: list[str] = []
-        for skill_name, refs in REQUIRED.items():
-            runtime_skill = runtime_base / skill_name
-            repo_skill = (ROOT / skill_name).resolve()
-            if not runtime_skill.exists() and not runtime_skill.is_symlink():
-                continue
+        runtime_skill = runtime_base / SKILL_NAME
+        if not runtime_skill.exists() and not runtime_skill.is_symlink():
+            runtime_note = (
+                f"已找到运行版目录 {runtime_base}，其中没有 {SKILL_NAME}，无法核对一致性。"
+            )
+        elif runtime_skill.is_symlink() and Path(os.path.realpath(runtime_skill)) == ROOT:
             # 运行版是指向本仓库的软链 -> 同一份文件，天然一致，不做逐字节比对
-            if runtime_skill.is_symlink() and Path(os.path.realpath(runtime_skill)) == repo_skill:
-                linked.append(skill_name)
-                continue
-            for relative in ["SKILL.md", *refs]:
+            runtime_note = (
+                f"已核对运行版目录 {runtime_base}（{SKILL_NAME} 为指向本仓库的软链，直接判定一致）。"
+            )
+        else:
+            # 运行版是独立拷贝：逐文件比对，确认没有被改过而忘记同步回仓库
+            for relative in ["SKILL.md", *REQUIRED]:
                 runtime_ref = runtime_skill / relative
-                repo_ref = ROOT / skill_name / relative
+                repo_ref = ROOT / relative
                 if runtime_ref.is_file() and repo_ref.is_file():
                     if runtime_ref.read_bytes() != repo_ref.read_bytes():
-                        errors.append(f"运行版 {skill_name}/{relative} 与仓库版不一致")
+                        errors.append(f"运行版 {SKILL_NAME}/{relative} 与仓库版不一致")
                 elif repo_ref.is_file():
-                    errors.append(f"运行版缺少 {skill_name}/{relative}")
-        runtime_note = f"已核对运行版目录 {runtime_base}"
-        runtime_note += (
-            f"（{len(linked)} 个技能为指向本仓库的软链，直接判定一致）。"
-            if linked
-            else "。"
-        )
+                    errors.append(f"运行版缺少 {SKILL_NAME}/{relative}")
+            runtime_note = f"已核对运行版目录 {runtime_base}（{SKILL_NAME} 为独立拷贝，逐文件比对）。"
 
     if errors:
         print("验证失败：")
@@ -356,7 +350,7 @@ def main() -> int:
         return 1
 
     print(
-        f"验证通过：{len(REQUIRED)} 个技能；已检查目录与 frontmatter、全部必需参考文件、"
+        f"验证通过：单技能 {SKILL_NAME}；已检查仓库结构与 frontmatter、全部必需参考文件、"
         "非图片 Markdown 链接、编码完整性、基础敏感文本模式、简单需求简单写与默认内容边界、"
         "不访问网站与原型分流、截图能力判定与降级规则、"
         f"responsive-guide 目标材料优先、审校北极星与交付清理；{runtime_note}"
