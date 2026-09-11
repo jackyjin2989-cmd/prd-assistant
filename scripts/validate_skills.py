@@ -79,6 +79,7 @@ IMAGE_GUIDE_REQUIRED_MARKERS = [
     "每张截图必须紧跟对应描述或对应小标题",
     "禁止把各模块截图统一堆到章节末尾或文档末尾",
     "截图内容必须与正文口径一致",
+    "插图时记录进入该状态的方式",
     "截图能力判定",
 ]
 IMAGE_GUIDE_FORBIDDEN_MARKERS = [

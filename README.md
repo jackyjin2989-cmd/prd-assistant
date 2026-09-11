@@ -1,6 +1,7 @@
 # PRD Assistant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![validate](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml/badge.svg)](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml)
 [![GitHub stars](https://img.shields.io/github/stars/jackyjin2989-cmd/prd-assistant?style=social)](https://github.com/jackyjin2989-cmd/prd-assistant/stargazers)
 
 一个面向产品经理的可复用 Skill：从文字、截图、会议纪要或已有草稿中起草、补全和审校 PRD，聚焦核心产品功能与改动；用户明确要求时制作自包含 HTML 原型。
@@ -40,12 +41,42 @@
 
 ### 安装
 
-将 `prd-assistant` 目录复制到宿主约定的技能目录，保留 `SKILL.md` 与 `references/` 结构即可：
+**方式一：复制安装**（只用不改）
+
+把技能目录复制到宿主约定的技能目录，保留 `SKILL.md` 与 `references/` 结构即可：
 
 ```
 git clone https://github.com/jackyjin2989-cmd/prd-assistant.git
 Copy-Item -Recurse prd-assistant\prd-assistant <宿主技能目录>\prd-assistant
+Copy-Item -Recurse prd-assistant\html-prototype-screenshot <宿主技能目录>\html-prototype-screenshot
 ```
+
+**方式二：开发模式（软链，改完即生效）**
+
+要改技能内容时用这种方式：运行目录是指向仓库克隆的软链，`git pull` 一下运行版就更新，不用手动同步。
+
+注意 **HTTPS 通道在部分公司网络下会被拦截**，用 SSH 形式克隆（`git@github.com:...`）。
+
+```bash
+# 1. 克隆（建议放固定位置，例如 ~/WorkBuddy/prd-assistant）
+git clone git@github.com:jackyjin2989-cmd/prd-assistant.git ~/WorkBuddy/prd-assistant
+
+# 2. 先备份原有运行目录（不要直接删）
+mkdir -p ~/.workbuddy/backups/skills
+mv ~/.workbuddy/skills/prd-assistant ~/.workbuddy/backups/skills/prd-assistant-$(date +%Y%m%d-%H%M)
+
+# 3. 建软链（Windows 无权限时改用 junction：cmd /c mklink /J <链接> <目标>）
+ln -s ~/WorkBuddy/prd-assistant/prd-assistant ~/.workbuddy/skills/prd-assistant
+
+# 4. 验证（find 必须加 -L，否则统计不到软链下的文件）
+ls -la ~/.workbuddy/skills | grep prd-assistant
+find -L ~/.workbuddy/skills/prd-assistant -type f | wc -l
+head -3 ~/.workbuddy/skills/prd-assistant/SKILL.md
+```
+
+第二个技能 `html-prototype-screenshot` 同样处理。回滚：删掉软链，把备份 `mv` 回原位。
+
+日常流程：**改前先 `git pull`，改完立即 commit + push，同一时间只让一个 agent 改这个仓库**（多个 agent 通常软链到同一个克隆，同时改会互相覆盖工作区）。推送前跑 `python scripts/validate_skills.py`。
 
 安装后的结构：
 
@@ -144,7 +175,9 @@ python scripts/scan_prd.py --strict <路径>     # 待人工确认项也按失�
 
 检查内容：范围排除与迭代痕迹残留词、图片引用是否存在/是否用绝对路径/是否缺 alt/编号是否连续、同目录未被任何文档引用的图片、相对链接可达性、占位残留（TODO/待补图/截图占位）、编码损坏。
 
-输出分两级：**❌ 错误**（引用失效、绝对路径、占位残留等，退出码 1）与 **⚠️ 待人工确认**（如「本期不做」可能是合规硬约束，需人判断）。注意这个脚本面向 PRD，不要拿它扫技能自身的文档 —— 技能文档里出现这类字样是正常的策略描述。
+输出分两级：**❌ 错误**（引用失效、绝对路径、表格列数不一致、占位残留等，退出码 1）与 **⚠️ 待人工确认**（如「本期不做」可能是合规硬约束、标题层级跳级，需人判断）。扫描时跳过点目录与 `node_modules` 等依赖目录。
+
+**用法边界**：路径指向**某个需求目录**（如 `.../某需求/`），不要指向含多个项目的父目录——代码库、依赖包、技能文档一起扫进来会产生大量无关结果。同理不要拿它扫技能自身的文档：技能文档里出现「本期不做」「待补图」这类字样是正常的策略描述。
 
 脚本检查 Skill 目录与 frontmatter、全部必需参考文件、仓库内非图片 Markdown 链接、编码完整性、基础敏感文本模式、"简单需求简单写"与内容边界规则、不访问网站与原型分流规则、截图能力判定与降级规则，并核对运行版与仓库版文件一致性。脚本不替代人工语义审查。
 

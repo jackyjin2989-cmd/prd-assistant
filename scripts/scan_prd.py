@@ -7,7 +7,7 @@
 
 与 validate_skills.py 的分工：
     validate_skills.py 检查「技能仓库自身」（结构、frontmatter、策略标记）。
-    scan_prd.py 检查「产出的 PRD 文档」（残留词、图片引用、链接可达性、编号连续性）。
+    scan_prd.py 检查「产出的 PRD 文档」（残留词、图片引用、表格列数与标题层级、链接可达性、编号连续性）。
     注意：本脚本面向 PRD，不要拿它扫技能自身的文档 —— 技能文档里出现「本期不做」等
     字样是正常的策略描述。
 
@@ -36,9 +36,10 @@ TRACE_WORDS = [
     r"曾考虑", r"之前(?:的|是)", r"(?<!不)占位(?!符|文案)", r"草稿", r"待补",
 ]
 
-# 占位残留：未完成标记
+# 占位残留：未完成标记。
+# 不收录裸「XXX」——技术文档里 `XXXX.txt`、`XXX_placeholder` 这类正常写法会被误判。
 PLACEHOLDER_WORDS = [
-    r"截图占位", r"待补图", r"图片占位", r"\bTODO\b", r"\bFIXME\b", r"\bTBD\b", r"XXX",
+    r"截图占位", r"待补图", r"图片占位", r"\bTODO\b", r"\bFIXME\b", r"\bTBD\b",
 ]
 
 # 交付物与实现细节：PRD 正文默认不交代（项目有要求附原型链接时按项目惯例）
@@ -47,6 +48,8 @@ ARTIFACT_WORDS = [
 ]
 
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp"}
+# 目录扫描时跳过的噪声目录：工具/版本控制/依赖，里面的文档不是交付物
+SKIP_DIRS = {"node_modules", "__pycache__", "venv", ".venv", "dist", "build"}
 MD_IMAGE = re.compile(r"!\[([^\]]*)\]\(\s*([^)\s]+)")
 HTML_IMG = re.compile(r"<img\b[^>]*>", re.IGNORECASE)
 HTML_ATTR = re.compile(r"""(src|alt)\s*=\s*(?:"([^"]*)"|'([^']*)')""", re.IGNORECASE)
@@ -64,6 +67,66 @@ class Finding:
 def is_external(target: str) -> bool:
     lowered = target.lower()
     return lowered.startswith(("http://", "https://", "mailto:", "data:", "#"))
+
+
+def count_unescaped_pipes(line: str) -> int:
+    """表格列数按未转义的 `|` 计；单元格内的 `\\|` 不算分隔符。"""
+    return line.replace("\\|", "").count("|")
+
+
+def scan_structure(text: str) -> list[Finding]:
+    """结构类检查：Markdown 表格列数一致性、标题层级跳级。均跳过代码块内内容。"""
+    findings: list[Finding] = []
+    block: list[tuple[int, str]] = []
+    in_fence = False
+    previous_level = 0
+
+    def flush_table() -> None:
+        nonlocal block
+        if len(block) >= 2:
+            _, separator = block[1]
+            if re.fullmatch(r"[\s|:\-]+", separator) and "-" in separator:
+                expected = count_unescaped_pipes(separator)
+                for line_no, row in block:
+                    actual = count_unescaped_pipes(row)
+                    if actual != expected:
+                        findings.append(
+                            Finding(
+                                "error",
+                                line_no,
+                                f"表格列数不一致（分隔行 {expected} 个竖线、本行 {actual} 个）："
+                                + row.strip()[:50],
+                            )
+                        )
+        block = []
+
+    for index, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
+        if stripped.startswith(("```", "~~~")):
+            flush_table()
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        if re.match(r"^\s*\|.*\|\s*$", line):
+            block.append((index, line))
+            continue
+        flush_table()
+        heading = re.match(r"^(#{1,6})\s+\S", line)
+        if heading:
+            level = len(heading.group(1))
+            if previous_level and level > previous_level + 1:
+                findings.append(
+                    Finding(
+                        "review",
+                        index,
+                        f"标题层级跳级：从 {'#' * previous_level} 跳到 {'#' * level}"
+                        f"（{stripped[:30]}）",
+                    )
+                )
+            previous_level = level
+    flush_table()
+    return findings
 
 
 def is_absolute(target: str) -> bool:
@@ -111,6 +174,8 @@ def scan_file(path: Path) -> tuple[list[Finding], dict[str, int]]:
                 findings.append(
                     Finding("error", index, f"占位残留「{match.group(0)}」：{line.strip()[:60]}")
                 )
+
+    findings += scan_structure(text)
 
     # ---- 图片引用 ----
     referenced: list[tuple[str, int]] = []
@@ -229,11 +294,18 @@ def scan_file(path: Path) -> tuple[list[Finding], dict[str, int]]:
 
 
 def collect(targets: list[str]) -> list[Path]:
+    def noise(path: Path) -> bool:
+        # 点开头的目录（.git/.workbuddy 等）与依赖目录里的文档不是交付物
+        return any(part.startswith(".") or part in SKIP_DIRS for part in path.parts)
+
     files: list[Path] = []
     for raw in targets:
         path = Path(raw).expanduser()
         if path.is_dir():
-            files += sorted(p for p in path.rglob("*.md") if ".git" not in p.parts)
+            files += sorted(
+                p for p in path.rglob("*.md")
+                if not noise(p.relative_to(path))
+            )
         elif path.is_file():
             files.append(path)
         else:
@@ -251,6 +323,7 @@ def main() -> int:
 
     total_error = 0
     total_review = 0
+    dirty_files: list[str] = []
     print(f"扫描 {len(files)} 个文件\n")
 
     for path in files:
@@ -259,6 +332,8 @@ def main() -> int:
         reviews = [f for f in findings if f.level == "review"]
         total_error += len(errors)
         total_review += len(reviews)
+        if errors:
+            dirty_files.append(path.name)
 
         print(f"{path}（图片 {stats['images']} 张、链接 {stats['links']} 条）")
         if not findings:
@@ -269,7 +344,16 @@ def main() -> int:
             print(f"  {mark} {where}{finding.message}")
         print()
 
-    print(f"汇总：{total_error} 个错误、{total_review} 项待人工确认")
+    summary = f"汇总：{total_error} 个错误、{total_review} 项待人工确认"
+    if dirty_files:
+        shown = "、".join(dirty_files[:5]) + ("…" if len(dirty_files) > 5 else "")
+        summary += f"；有错误的文件 {len(dirty_files)} 个（{shown}）"
+    print(summary)
+    if len(files) > 20:
+        print(
+            "提示：一次扫到 20 个以上文件，说明给的是大目录。本脚本面向 PRD，"
+            "建议直接指向某个需求目录，避免把代码库、依赖包、技能文档一起扫进来。"
+        )
     if total_error or (strict and total_review):
         return 1
     return 0

@@ -1,6 +1,6 @@
 ---
 name: html-prototype-screenshot
-description: 在 macOS 上不打扰用户地渲染本地 HTML（原型/页面）并截图做视觉验证，包括滚动到指定位置、切到指定页面后再截图。凡是需要「看一眼自己写的 HTML 长什么样」「验证布局/吸底/图表是否生效」「给 HTML 原型截图」时调用。
+description: 在 macOS 上不打扰用户地渲染本地 HTML（原型/页面）并截图做视觉验证，包括滚动到指定位置、切到指定页面后再截图。凡是需要「看一眼自己写的 HTML 长什么样」「验证布局/吸底/图表是否生效」「给 HTML 原型截图」时调用。本技能只做渲染与验证，不写 PRD。
 agent_created: true
 ---
 
