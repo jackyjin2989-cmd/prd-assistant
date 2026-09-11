@@ -300,7 +300,7 @@ def main() -> int:
     errors.extend(check_forbidden_markers(screenshot_tooling, SCREENSHOT_FORBIDDEN_MARKERS))
 
     for path in ROOT.rglob("*"):
-        if not path.is_file() or ".git" in path.parts or path.name == "validate_skills.py":
+        if not path.is_file() or ".git" in path.parts or path.name == "validate_skill.py":
             continue
         if path.suffix.lower() not in TEXT_SUFFIXES:
             continue

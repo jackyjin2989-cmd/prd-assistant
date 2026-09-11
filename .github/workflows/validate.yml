@@ -17,10 +17,10 @@ jobs:
           python-version: "3.x"
 
       - name: 脚本语法检查
-        run: python -m py_compile scripts/validate_skills.py scripts/scan_prd.py
+        run: python -m py_compile scripts/validate_skill.py scripts/scan_prd.py
 
       - name: 校验技能仓库结构与策略标记
-        run: python scripts/validate_skills.py
+        run: python scripts/validate_skill.py
 
       - name: 扫描脚本自测
         run: python scripts/test_scan_prd.py

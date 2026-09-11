@@ -22,14 +22,14 @@
 - 冲突处理、原型分流 → `references/input-intake.md`
 - 图片相关规则 → `references/图片嵌入与截图指南.md`
 
-`scripts/validate_skills.py` 用 REQUIRED / FORBIDDEN 标记把这条锁住：必需的策略句子被删掉会校验失败，不该出现的旧职责或 SOP 被抄回来也会失败。新增或收敛规则时，同步更新对应标记。
+`scripts/validate_skill.py` 用 REQUIRED / FORBIDDEN 标记把这条锁住：必需的策略句子被删掉会校验失败，不该出现的旧职责或 SOP 被抄回来也会失败。新增或收敛规则时，同步更新对应标记。
 
 ## 验证脚本
 
-`scripts/validate_skills.py` —— 技能自身：结构与 frontmatter、全部必需参考文件、非图片 Markdown 链接、编码完整性、基础敏感文本模式、各文件的策略标记，并核对运行版与仓库版是否一致（运行版是软链则直接判定一致；是独立拷贝则逐文件比对）。
+`scripts/validate_skill.py` —— 技能自身：结构与 frontmatter、全部必需参考文件、非图片 Markdown 链接、编码完整性、基础敏感文本模式、各文件的策略标记，并核对运行版与仓库版是否一致（运行版是软链则直接判定一致；是独立拷贝则逐文件比对）。
 
 ```
-python scripts/validate_skills.py
+python scripts/validate_skill.py
 ```
 
 `scripts/scan_prd.py` —— 产出的 PRD（不是技能自身）：
@@ -80,5 +80,5 @@ python scripts/scan_prd.py --strict <路径>     # 待人工确认项也按失�
 ## 提交流程
 
 1. 改前 `git pull`；改完立即 commit + push（**同一时间只让一个 agent 改这个仓库** —— 多个 agent 通常软链到同一个克隆，同时改会互相覆盖工作区）。
-2. 推送前跑 `python scripts/validate_skills.py`；动了扫描脚本再加跑 `python scripts/test_scan_prd.py`。
+2. 推送前跑 `python scripts/validate_skill.py`；动了扫描脚本再加跑 `python scripts/test_scan_prd.py`。
 3. 结构性变更打版本 tag，并在 README 更新版本徽章。

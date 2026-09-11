@@ -5,8 +5,8 @@
     python3 scripts/scan_prd.py <PRD 文件或目录> [更多路径 ...]
     python3 scripts/scan_prd.py --strict <路径>   # 待人工确认项也按失败处理
 
-与 validate_skills.py 的分工：
-    validate_skills.py 检查「技能仓库自身」（结构、frontmatter、策略标记）。
+与 validate_skill.py 的分工：
+    validate_skill.py 检查「技能仓库自身」（结构、frontmatter、策略标记）。
     scan_prd.py 检查「产出的 PRD 文档」（残留词、图片引用、表格列数与标题层级、链接可达性、编号连续性）。
     注意：本脚本面向 PRD，不要拿它扫技能自身的文档 —— 技能文档里出现「本期不做」等
     字样是正常的策略描述。

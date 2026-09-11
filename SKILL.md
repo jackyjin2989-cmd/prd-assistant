@@ -106,7 +106,7 @@ description: 为产品经理按需求复杂度起草、补全和审校聚焦核�
 - **只取需要的目录**：`git init` → `remote add` → `sparse-checkout set "<目录>"` → `pull --depth=1`，避免拉全库。
 - **提交身份**按该仓库历史作者取（`git log --format="%an <%ae>"`），不要用全局身份或随手编一个。
 - **只提交正文引用的文件**；未被引用的截图与临时产物不入库；平台临时文件（`.DS_Store` 等）写进 `.git/info/exclude`。
-- **推送前跑仓库自带的校验或测试**（如 `scripts/validate_skills.py`）；必要时先 `--dry-run`。被分支保护拦下时改推新分支，并给出创建 MR 的链接。
+- **推送前跑仓库自带的校验或测试**（如 `scripts/validate_skill.py`）；必要时先 `--dry-run`。被分支保护拦下时改推新分支，并给出创建 MR 的链接。
 
 ## 冲突处理
 

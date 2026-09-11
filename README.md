@@ -60,7 +60,7 @@ ln -s ~/WorkBuddy/prd-assistant ~/.workbuddy/skills/prd-assistant
 ## 验证
 
 ```bash
-python scripts/validate_skills.py       # 技能自身：结构、frontmatter、参考文件、链接、策略标记、运行版一致性
+python scripts/validate_skill.py       # 技能自身：结构、frontmatter、参考文件、链接、策略标记、运行版一致性
 python scripts/scan_prd.py <PRD 路径>   # 产出的 PRD：残留词、图片引用与编号、表格列数、链接可达性
 python scripts/test_scan_prd.py         # 扫描脚本自测
 ```
