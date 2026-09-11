@@ -163,12 +163,15 @@ SCREENSHOT_REQUIRED_MARKERS = [
     "## 与 prd-assistant 的分工",
     "--headless=old",
     "--dump-dom",
-    "截图内容必须与文档口径一致",
+    "按文档所述状态取图",
 ]
+# 「口径一致」这条规则只在 prd-assistant 的图片嵌入指南里定义一份，
+# 截图技能引用它即可；出现即视为职责复制。
 SCREENSHOT_FORBIDDEN_MARKERS = [
     "## 环境能不能截图的判定",
     "比对顺序",
     "通过 / 受限 / 未完成",
+    "口径一致",
 ]
 # 运行版技能目录候选：环境变量优先，其次各宿主约定目录。命中第一个存在的即用它。
 RUNTIME_CANDIDATES = [

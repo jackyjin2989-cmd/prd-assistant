@@ -7,10 +7,23 @@
 
 一个面向产品经理的可复用 Skill：从文字、截图、会议纪要或已有草稿中起草、补全和审校 PRD，聚焦核心产品功能与改动；用户明确要求时制作自包含 HTML 原型。
 
-仓库内含两个技能，职责分开、互不重复：
+## 仓库里有什么
+
+本仓库是一个**技能集合**（monorepo）：两个可独立安装的技能 + 一套仓库级工具链。仓库名沿用了第一个技能的名字，所以会出现 `prd-assistant/prd-assistant/` 这样的双层同名路径 —— 前一层是仓库，后一层是技能目录。
+
+| 顶层目录 | 是什么 | 归属 |
+|---|---|---|
+| `prd-assistant/` | 技能一：起草与审校 PRD、定义原型规范与视觉判定 | 技能，可独立安装 |
+| `html-prototype-screenshot/` | 技能二：渲染本地 HTML、截图与量尺寸 | 技能，可独立安装（通用，与 PRD 无关） |
+| `scripts/` | 仓库级工具链：技能仓库校验、PRD 扫描、扫描自测 | 基础设施，不随技能安装 |
+| `.github/workflows/` | CI：push / PR 时自动跑语法检查与上述校验 | 基础设施 |
+
+两个技能职责分开、互不重复：
 
 - **`prd-assistant`** —— 写与审校 PRD（本 README 的主体）。
 - **`html-prototype-screenshot`** —— 在 macOS 上用无头 Edge 渲染本地 HTML 并截图、量尺寸。`prd-assistant` 只定义「能不能截、什么算通过」，具体命令与参数归它管。
+
+一条规则只写一份：**能不能截、什么算通过、截图与正文是否一致** 归 `prd-assistant`；**怎么截、怎么量** 归 `html-prototype-screenshot`。`scripts/validate_skills.py` 用标记双向锁住这条分工，任一侧越界都会校验失败。
 
 ## 特性
 
