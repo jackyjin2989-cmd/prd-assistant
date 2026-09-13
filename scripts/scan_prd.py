@@ -1,371 +1,435 @@
 #!/usr/bin/env python3
-"""PRD 交付前扫描：把「靠人记」的收尾检查变成一条命令。
+"""PRD 静态扫描（stdlib，Python 3.10+ 语法目标）。
 
-用法：
-    python3 scripts/scan_prd.py <PRD 文件或目录> [更多路径 ...]
-    python3 scripts/scan_prd.py --strict <路径>   # 待人工确认项也按失败处理
-
-与 validate_skill.py 的分工：
-    validate_skill.py 检查「技能仓库自身」（结构、frontmatter、策略标记）。
-    scan_prd.py 检查「产出的 PRD 文档」（残留词、图片引用、表格列数与标题层级、链接可达性、编号连续性）。
-    注意：本脚本面向 PRD，不要拿它扫技能自身的文档 —— 技能文档里出现「本期不做」等
-    字样是正常的策略描述。
-
-退出码：0 无错误（或仅有待确认项）；1 存在错误，或 --strict 下有待确认项；2 未找到可扫文件。
+scan_file 默认仅读取选中文档，根默认为文件父目录；目录 target 的根为该目录。
+--root 限定同一授权交付根；不推导多个 target 的公共祖先、不 expanduser。
+--assets-dir 仅检查明确资源目录；CLI 要求同时给 --root，允许读根内安全兄弟 MD。
+未指定资源目录不做孤儿图检查。外链不联网，本地 fragment 只生成待确认项。
+--ack FILE 是人工填写的 version=1 JSON；只确认 review，不消除 error。
+退出码：0 通过，1 存在 error/strict 下未确认 review，2 配置或输入异常。
 """
-
 from __future__ import annotations
 
+import argparse
+import hashlib
+import json
 import re
 import sys
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from urllib.parse import unquote
 
-# ---------------------------------------------------------------- 词表
-#
-# 维护约定（改这里之前先读）：
-# 扫描类工具的第一杀手是**误报** —— 规则写宽了，使用者就不再跑它。
-# 新增词条或检查项时的固定动作：
-#   1. 先在真实 PRD 语料上跑一遍，统计误报；
-#   2. 误报多的规则要么收紧（加前后文限定），要么在 README 的用法边界里写清适用场景；
-#   3. 在 scripts/test_scan_prd.py 里补一条「应报」与一条「不应报」的用例，再跑一遍测试。
-# 历史教训：裸 `XXX` 会误报 `XXXX.txt.enc.TEMP`；未扣除兄弟文档引用会把别人引用的
-# 图片报成未引用；不跳过代码块会把示例里的表格与井号当正文。
+from prd_syntax import is_absolute, is_reparse, links, local_target, prose_lines, read_text, safe_resolve
 
-# 范围排除：规则是「默认不写」，命中即需人工确认（可能是合规/合同类硬约束，属允许保留）
 SCOPE_WORDS = [
     r"本期不做", r"本期不含", r"本期不涉及", r"不在本期", r"范围排除",
     r"暂不(?:做|支持|考虑)", r"非[^，。；]{0,6}版", r"不再(?:展示|支持|提供)",
 ]
-
-# 迭代痕迹：被否方案、会话残留、编辑过程（正常 PRD 不应出现）
-# 「占位」只作迭代痕迹看，放行「不占位」「占位符」「占位文案」这类正常产品措辞
 TRACE_WORDS = [
-    r"原[「『\"]", r"（原", r"已改为", r"已调整", r"已删除", r"已清理",
+    r'原[「『"]', r"（原", r"已改为", r"已调整", r"已删除", r"已清理",
     r"曾考虑", r"之前(?:的|是)", r"(?<!不)占位(?!符|文案)", r"草稿", r"待补",
 ]
-
-# 占位残留：未完成标记。
-# 不收录裸「XXX」——技术文档里 `XXXX.txt`、`XXX_placeholder` 这类正常写法会被误判。
-PLACEHOLDER_WORDS = [
-    r"截图占位", r"待补图", r"图片占位", r"\bTODO\b", r"\bFIXME\b", r"\bTBD\b",
-]
-
-# 交付物与实现细节：PRD 正文默认不交代（项目有要求附原型链接时按项目惯例）
-ARTIFACT_WORDS = [
-    r"本文截图取自", r"截图取自该原型", r"中台返回的文件\s*URL",
-]
-
+PLACEHOLDER_WORDS = [r"截图占位", r"待补图", r"图片占位", r"\bTODO\b", r"\bFIXME\b", r"\bTBD\b"]
+ARTIFACT_WORDS = [r"本文截图取自", r"截图取自该原型", r"中台返回的文件\s*URL"]
+OPTIONAL_HEADINGS = {"验收标准", "测试用例", "成功判定", "里程碑", "风险评估", "FAQ", "版本记录", "名词解释", "非功能要求"}
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp"}
-# 目录扫描时跳过的噪声目录：工具/版本控制/依赖，里面的文档不是交付物
 SKIP_DIRS = {"node_modules", "__pycache__", "venv", ".venv", "dist", "build"}
-MD_IMAGE = re.compile(r"!\[([^\]]*)\]\(\s*([^)\s]+)")
-HTML_IMG = re.compile(r"<img\b[^>]*>", re.IGNORECASE)
-HTML_ATTR = re.compile(r"""(src|alt)\s*=\s*(?:"([^"]*)"|'([^']*)')""", re.IGNORECASE)
-MD_LINK = re.compile(r"(?<!!)\[[^\]]*\]\(\s*([^)\s]+)")
-LEADING_NUM = re.compile(r"^(\d+)")
+INPUT_CODES = {"INPUT_READ", "INPUT_ENCODING", "INPUT_TYPE", "ASSET_INPUT"}
 
 
+@dataclass
 class Finding:
-    def __init__(self, level: str, line: int | None, message: str) -> None:
-        self.level = level  # error | review
-        self.line = line
-        self.message = message
+    level: str
+    line: int | None
+    message: str
+    code: str = "UNCLASSIFIED"
+    fingerprint: str = ""
+    acknowledged: bool = False
+    acknowledgement_reason: str | None = None
 
 
 def is_external(target: str) -> bool:
-    lowered = target.lower()
-    return lowered.startswith(("http://", "https://", "mailto:", "data:", "#"))
+    try:
+        return local_target(target)[0] is None
+    except (ValueError, UnicodeError):
+        return False
+
+
+def _pipe_positions(line: str) -> list[int]:
+    positions: list[int] = []
+    escapes = 0
+    for i, char in enumerate(line):
+        if char == "|" and escapes % 2 == 0:
+            positions.append(i)
+        escapes = escapes + 1 if char == "\\" else 0
+    return positions
 
 
 def count_unescaped_pipes(line: str) -> int:
-    """表格列数按未转义的 `|` 计；单元格内的 `\\|` 不算分隔符。"""
-    return line.replace("\\|", "").count("|")
+    return len(_pipe_positions(line))
+
+
+def _cells(line: str, original: str | None = None) -> list[str] | None:
+    row = line.strip()
+    original = line if original is None else original
+    positions = _pipe_positions(row)
+    if not positions:
+        return None
+    pieces: list[str] = []
+    start = 0
+    for pos in positions:
+        pieces.append(row[start:pos].strip())
+        start = pos + 1
+    pieces.append(row[start:].strip())
+    # 被屏蔽的代码单元格仍占一列；外侧竖线身份必须按原始行判断。
+    if positions[0] == 0 and original.lstrip().startswith("|"):
+        pieces.pop(0)
+    if positions[-1] == len(row) - 1 and original.rstrip().endswith("|"):
+        pieces.pop()
+    return pieces
 
 
 def scan_structure(text: str) -> list[Finding]:
-    """结构类检查：Markdown 表格列数一致性、标题层级跳级。均跳过代码块内内容。"""
+    """列数是交付一致性检查；忽略代码跨度内管道，不声称完整 GFM 兼容。"""
     findings: list[Finding] = []
-    block: list[tuple[int, str]] = []
-    in_fence = False
+    rows = prose_lines(text)
+    original_rows = text.removeprefix("\ufeff").splitlines()
     previous_level = 0
-
-    def flush_table() -> None:
-        nonlocal block
-        if len(block) >= 2:
-            _, separator = block[1]
-            if re.fullmatch(r"[\s|:\-]+", separator) and "-" in separator:
-                expected = count_unescaped_pipes(separator)
-                for line_no, row in block:
-                    actual = count_unescaped_pipes(row)
-                    if actual != expected:
-                        findings.append(
-                            Finding(
-                                "error",
-                                line_no,
-                                f"表格列数不一致（分隔行 {expected} 个竖线、本行 {actual} 个）："
-                                + row.strip()[:50],
-                            )
-                        )
-        block = []
-
-    for index, line in enumerate(text.splitlines(), start=1):
-        stripped = line.strip()
-        if stripped.startswith(("```", "~~~")):
-            flush_table()
-            in_fence = not in_fence
-            continue
-        if in_fence:
-            continue
-        if re.match(r"^\s*\|.*\|\s*$", line):
-            block.append((index, line))
-            continue
-        flush_table()
-        heading = re.match(r"^(#{1,6})\s+\S", line)
+    table_columns: int | None = None
+    for index, (line_no, row) in enumerate(rows):
+        heading = re.match(r"^ {0,3}(#{1,6})\s+(\S.*?)\s*#*\s*$", row)
         if heading:
-            level = len(heading.group(1))
+            level = len(heading[1])
             if previous_level and level > previous_level + 1:
-                findings.append(
-                    Finding(
-                        "review",
-                        index,
-                        f"标题层级跳级：从 {'#' * previous_level} 跳到 {'#' * level}"
-                        f"（{stripped[:30]}）",
-                    )
-                )
+                findings.append(Finding("review", line_no,
+                                        f"标题层级跳级：从 {'#' * previous_level} 跳到 {'#' * level}（{row.strip()[:30]}）", "HEADING_JUMP"))
             previous_level = level
-    flush_table()
+            if heading[2] in OPTIONAL_HEADINGS:
+                findings.append(Finding("review", line_no, f"可选章节需人工确认是否明确要求：{heading[2]}", "OPTIONAL_SECTION"))
+        cells = _cells(row, original_rows[index])
+        if table_columns is not None:
+            if cells is None or not row.strip() or heading:
+                table_columns = None
+            else:
+                if len(cells) != table_columns:
+                    findings.append(Finding("error", line_no,
+                                            f"表格列数不一致（应为 {table_columns} 列，本行 {len(cells)} 列）：{row.strip()[:50]}", "TABLE_COLUMNS"))
+                continue
+        if cells and all(re.fullmatch(r":?-+:?", cell) for cell in cells) and index:
+            header = _cells(rows[index - 1][1], original_rows[index - 1])
+            if header and len(header) == len(cells):
+                table_columns = len(cells)
     return findings
 
 
-def is_absolute(target: str) -> bool:
-    lowered = target.lower()
-    return (
-        target.startswith("/")
-        or lowered.startswith("file:")
-        or re.match(r"^[a-z]:[\\/]", lowered) is not None
-    )
-
-
-def scan_words(text: str, patterns: list[str], level: str, label: str) -> list[Finding]:
+def scan_words(text: str, patterns: list[str], level: str, label: str, code: str = "WORD_REVIEW") -> list[Finding]:
     findings: list[Finding] = []
-    compiled = [re.compile(p) for p in patterns]
-    for index, line in enumerate(text.splitlines(), start=1):
+    compiled = [re.compile(pattern) for pattern in patterns]
+    for index, row in prose_lines(text):
         for pattern in compiled:
-            match = pattern.search(line)
+            match = pattern.search(row)
             if match:
-                findings.append(
-                    Finding(level, index, f"{label}「{match.group(0)}」：{line.strip()[:60]}")
-                )
+                findings.append(Finding(level, index, f"{label}「{match[0]}」：{row.strip()[:60]}", code))
     return findings
 
 
-def scan_file(path: Path) -> tuple[list[Finding], dict[str, int]]:
-    findings: list[Finding] = []
-    stats = {"images": 0, "links": 0}
+def _fingerprint(findings: list[Finding], path: Path, content_hash: str) -> None:
+    for finding in findings:
+        payload = [str(path), content_hash, finding.code, finding.line, finding.message]
+        finding.fingerprint = hashlib.sha256(json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
 
-    try:
-        text = path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        return [Finding("error", None, "非 UTF-8 编码，无法读取")], stats
 
-    if "\ufffd" in text:
-        findings.append(Finding("error", None, "含无效编码字符 (U+FFFD)，文本已损坏"))
+def _ack_entries(value: object) -> dict[str, str]:
+    if not isinstance(value, dict) or set(value) != {"version", "entries"} or type(value["version"]) is not int or value["version"] != 1:
+        raise ValueError("ack 必须为 version=1、entries 数组的 JSON 对象")
+    if not isinstance(value["entries"], list):
+        raise ValueError("ack entries 必须是数组")
+    entries: dict[str, str] = {}
+    for item in value["entries"]:
+        if not isinstance(item, dict) or set(item) != {"fingerprint", "reason"}:
+            raise ValueError("ack 条目必须且只能包含 fingerprint 和 reason")
+        fingerprint, reason = item["fingerprint"], item["reason"]
+        if not isinstance(fingerprint, str) or not re.fullmatch(r"[0-9a-f]{64}", fingerprint):
+            raise ValueError("ack fingerprint 必须是 64 位小写 SHA-256")
+        if not isinstance(reason, str) or not reason.strip():
+            raise ValueError("ack reason 不得为空")
+        if fingerprint in entries:
+            raise ValueError("ack fingerprint 重复")
+        entries[fingerprint] = reason.strip()
+    return entries
 
-    findings += scan_words(text, SCOPE_WORDS, "review", "疑似范围排除")
-    findings += scan_words(text, TRACE_WORDS, "review", "疑似迭代痕迹")
-    findings += scan_words(text, ARTIFACT_WORDS, "review", "疑似交付物/实现细节")
 
-    for pattern in PLACEHOLDER_WORDS:
-        for index, line in enumerate(text.splitlines(), start=1):
-            match = re.search(pattern, line)
-            if match:
-                findings.append(
-                    Finding("error", index, f"占位残留「{match.group(0)}」：{line.strip()[:60]}")
-                )
+def apply_acknowledgements(findings: list[Finding], acknowledgements: object) -> None:
+    entries = _ack_entries(acknowledgements)
+    known = {finding.fingerprint for finding in findings}
+    if set(entries) - known:
+        raise ValueError("ack 已过期或不属于本次扫描；请重新核对文档与发现指纹")
+    for finding in findings:
+        finding.acknowledged = finding.level == "review" and finding.fingerprint in entries
+        finding.acknowledgement_reason = entries[finding.fingerprint] if finding.acknowledged else None
 
-    findings += scan_structure(text)
 
-    # ---- 图片引用 ----
-    referenced: list[tuple[str, int]] = []
-    for index, line in enumerate(text.splitlines(), start=1):
-        for alt, target in MD_IMAGE.findall(line):
-            referenced.append((target, index))
-            if not alt.strip():
-                findings.append(Finding("error", index, f"图片缺替代文本：{target}"))
-        for tag in HTML_IMG.findall(line):
-            attrs = {k.lower(): (v1 or v2) for k, v1, v2 in HTML_ATTR.findall(tag)}
-            src = attrs.get("src")
-            if src:
-                referenced.append((src, index))
-            if "alt" not in attrs:
-                findings.append(Finding("review", index, f"HTML img 缺 alt：{src or tag[:40]}"))
-
-    order: list[str] = []
-    for target, index in referenced:
-        if is_external(target):
-            continue
-        if is_absolute(target):
-            findings.append(Finding("error", index, f"图片用了绝对路径（应为相对路径）：{target}"))
-            continue
-        stats["images"] += 1
-        resolved = (path.parent / unquote(target)).resolve()
-        if not resolved.exists():
-            findings.append(Finding("error", index, f"图片文件不存在：{target}"))
-        else:
-            order.append(unquote(target))
-
-    # ---- 编号连续性（文件名形如 01-xxx.png）----
-    numbers: list[tuple[int, str]] = []
-    for target in order:
-        match = LEADING_NUM.match(Path(target).name)
-        if match:
-            numbers.append((int(match.group(1)), target))
-    if len(numbers) >= 2:
-        seq = [n for n, _ in numbers]
-        if seq != list(range(seq[0], seq[0] + len(seq))):
-            findings.append(
-                Finding("review", None, f"图片编号不连续或与出现顺序不一致：{seq}")
-            )
-
-    # ---- 同目录未被引用的图片 ----
-    # 一个目录里的图片常被同目录多份文档共用，所以先扣掉兄弟文档引用过的文件名。
-    # 注意「引用」包含两种写法：图片语法 ![](...)，以及截图索引表里的普通链接 []（图很常见）
-    def html_srcs(doc_text: str) -> list[str]:
-        srcs: list[str] = []
-        for tag in HTML_IMG.findall(doc_text):
-            for key, double_quoted, single_quoted in HTML_ATTR.findall(tag):
-                if key.lower() == "src":
-                    value = double_quoted or single_quoted
-                    if value:
-                        srcs.append(value)
-        return srcs
-
-    def image_names_in(doc: Path) -> set[str]:
-        names: set[str] = set()
+def _walk(folder: Path, root: Path) -> list[Path]:
+    """静态安全遍历；不跟随任何目录/文件 reparse，路径解析失败的条目不进入队列。"""
+    folder = safe_resolve(folder, root)
+    result: list[Path] = []
+    for raw in sorted(folder.iterdir()):
         try:
-            doc_text = doc.read_text(encoding="utf-8")
-        except (UnicodeDecodeError, OSError):
-            return names
-        targets = [target for _, target in MD_IMAGE.findall(doc_text)]
-        targets += html_srcs(doc_text)
-        # 截图索引表里常用普通链接指向图片，同样算被引用
-        for raw in MD_LINK.findall(doc_text):
-            target = raw.strip().strip("<>").split("#", 1)[0]
-            if Path(target).suffix.lower() in IMAGE_SUFFIXES:
-                targets.append(target)
-        for target in targets:
-            if not is_external(target):
-                names.add(Path(unquote(target.strip().strip("<>"))).name)
-        return names
-
-    sibling_used: set[str] = set()
-    for sibling in path.parent.glob("*.md"):
-        if sibling != path:
-            sibling_used |= image_names_in(sibling)
-
-    dirs = {Path(unquote(t)).parent for t in order}
-    used_names = {Path(unquote(t)).name for t in order} | sibling_used | image_names_in(path)
-    for rel_dir in sorted(dirs):
-        folder = (path.parent / rel_dir).resolve()
-        if not folder.is_dir():
+            path = safe_resolve(raw, root)
+        except ValueError:
             continue
-        stray = sorted(
-            p.name for p in folder.iterdir()
-            if p.is_file() and p.suffix.lower() in IMAGE_SUFFIXES and p.name not in used_names
-        )
-        if stray:
-            findings.append(
-                Finding(
-                    "review",
-                    None,
-                    f"{rel_dir or '.'}/ 下有目录内任何文档都未引用的图片："
-                    + "、".join(stray[:8])
-                    + ("…" if len(stray) > 8 else ""),
-                )
-            )
+        if is_reparse(raw):
+            continue
+        if raw.name.startswith(".") or raw.name in SKIP_DIRS:
+            continue
+        if path.is_dir():
+            result.extend(_walk(path, root))
+        elif path.is_file():
+            result.append(path)
+    return result
 
-    # ---- 非图片链接可达性 ----
-    for index, line in enumerate(text.splitlines(), start=1):
-        for raw in MD_LINK.findall(line):
-            target = raw.strip().strip("<>")
-            if is_external(target):
-                continue
-            stats["links"] += 1
-            if is_absolute(target):
-                findings.append(Finding("error", index, f"链接用了绝对路径：{target}"))
-                continue
-            resolved = (path.parent / unquote(target.split("#", 1)[0])).resolve()
-            if not resolved.exists():
-                findings.append(Finding("error", index, f"相对链接失效：{target}"))
 
+def _asset_findings(path: Path, root: Path, text: str, assets_dirs: list[Path], include_siblings: bool) -> list[Finding]:
+    used: set[Path] = set()
+    docs = [(path, text)]
+    if include_siblings:
+        for raw in sorted(safe_resolve(path.parent, root).iterdir()):
+            if raw.suffix.lower() != ".md":
+                continue
+            try:
+                sibling = safe_resolve(raw, root)
+            except ValueError:
+                continue
+            if sibling == path or is_reparse(raw) or not sibling.is_file():
+                continue
+            docs.append((sibling, read_text(sibling, root)))
+    for doc, body in docs:
+        for link in links(body):
+            try:
+                target, _ = local_target(link.target)
+                if target:
+                    used.add(safe_resolve(doc.parent / target, root))
+            except (ValueError, UnicodeError):
+                continue
+    findings: list[Finding] = []
+    folders: set[Path] = set()
+    for raw in assets_dirs:
+        raw = Path(raw)
+        raw = raw if raw.is_absolute() else root / raw
+        folder = safe_resolve(raw, root)
+        if is_reparse(raw) or not folder.is_dir():
+            raise ValueError("资源目录必须是授权根内的普通目录，不接受 symlink/junction")
+        folders.add(folder)
+    orphaned: set[Path] = set()
+    for folder in sorted(folders):
+        orphaned.update(item for item in _walk(folder, root) if item.suffix.lower() in IMAGE_SUFFIXES and item not in used)
+    for orphan in sorted(orphaned):
+        findings.append(Finding("review", None, f"明确资源目录内未引用的图片（当前及已授权同目录文档）：{orphan.relative_to(root).as_posix()}", "IMAGE_UNUSED"))
+    return findings
+
+
+def scan_file(path: Path, *, root: Path | None = None, acknowledgements: dict[str, object] | None = None,
+              assets_dirs: list[Path] | None = None) -> tuple[list[Finding], dict[str, int]]:
+    """返回 findings/stats；输入文件异常为 error，ack 配置异常抛 ValueError。
+
+    assets_dirs 是可选的新增关键字；未传时绝不枚举兄弟文档/资源目录。
+    显式 root + assets_dirs 才允许读取同目录安全兄弟 Markdown 以扣除共享引用。
+    """
+    findings: list[Finding] = []
+    stats = {"images": 0, "links": 0, "external_unchecked": 0, "assets_dirs_checked": 0}
+    original = Path(path).absolute()
+    include_siblings = root is not None
+    boundary = Path(root) if root is not None else original.parent
+    digest = "unread"
+    try:
+        path = safe_resolve(original, boundary)
+        boundary = safe_resolve(boundary, boundary)
+        if path.suffix.lower() != ".md":
+            findings.append(Finding("error", None, "输入文件必须为 Markdown（.md，大小写均可）", "INPUT_TYPE"))
+            text = ""
+        else:
+            data = safe_resolve(path, boundary).read_bytes()
+            digest = hashlib.sha256(data).hexdigest()
+            text = data.decode("utf-8-sig")
+    except UnicodeError:
+        findings.append(Finding("error", None, "非 UTF-8 编码，无法读取", "INPUT_ENCODING"))
+        text = ""
+    except ValueError as exc:
+        findings.append(Finding("error", None, str(exc), "PATH_BOUNDARY"))
+        text = ""
+    except OSError:
+        findings.append(Finding("error", None, "文件缺失、不是普通文件或无法读取", "INPUT_READ"))
+        text = ""
+    if findings:
+        _fingerprint(findings, original, digest)
+        if acknowledgements is not None:
+            apply_acknowledgements(findings, acknowledgements)
+        return findings, stats
+    if "\ufffd" in text:
+        findings.append(Finding("error", None, "含无效编码字符 (U+FFFD)，文本已损坏", "INPUT_ENCODING"))
+    findings += scan_words(text, SCOPE_WORDS, "review", "疑似范围排除", "SCOPE_WORD")
+    findings += scan_words(text, TRACE_WORDS, "review", "疑似迭代痕迹", "TRACE_WORD")
+    findings += scan_words(text, ARTIFACT_WORDS, "review", "疑似交付物/实现细节", "ARTIFACT_WORD")
+    findings += scan_words(text, PLACEHOLDER_WORDS, "error", "占位残留", "PLACEHOLDER")
+    findings += scan_structure(text)
+    order: dict[Path, list[int]] = {}
+    seen_images: set[Path] = set()
+    for link in links(text):
+        if link.kind == "unresolved":
+            findings.append(Finding("review", link.line, f"引用定义未找到：{link.reference}", "REFERENCE_UNDEFINED"))
+            continue
+        if link.image and not link.alt.strip():
+            findings.append(Finding("error", link.line, f"图片缺替代文本：{link.target}", "IMAGE_ALT"))
+        if not link.target:
+            if link.image:
+                findings.append(Finding("error", link.line, "图片缺少 src 或目标为空", "IMAGE_SOURCE"))
+            else:
+                findings.append(Finding("review", link.line, "链接目标为空，需人工确认是否有意指向本文", "LINK_EMPTY"))
+            continue
+        try:
+            target, fragment = local_target(link.target)
+            if target is None:
+                stats["external_unchecked"] += 1
+                continue
+            stats["images" if link.image else "links"] += 1
+            resolved = safe_resolve(path.parent / target if target else path, boundary)
+            if not resolved.exists() or (link.image and not resolved.is_file()):
+                message = "图片文件不存在" if link.image else "相对链接失效"
+                findings.append(Finding("error", link.line, f"{message}：{link.target}", "IMAGE_MISSING" if link.image else "LINK_MISSING"))
+            elif link.image and resolved not in seen_images:
+                seen_images.add(resolved)
+                number = re.match(r"^(\d+)", resolved.name)
+                if number:
+                    order.setdefault(resolved.parent, []).append(int(number[1]))
+            if fragment:
+                findings.append(Finding("review", link.line, f"fragment/锚点尚未验证：{link.target}", "FRAGMENT_UNCHECKED"))
+        except (ValueError, UnicodeError) as exc:
+            findings.append(Finding("error", link.line, f"不安全链接：{link.target}（{exc}）", "PATH_UNSAFE"))
+        except OSError:
+            findings.append(Finding("error", link.line, f"本地目标无法检查：{link.target}", "LINK_IO"))
+    for folder, numbers in order.items():
+        if len(numbers) >= 2 and numbers != list(range(numbers[0], numbers[0] + len(numbers))):
+            findings.append(Finding("review", None,
+                                    f"图片编号不连续或与出现顺序不一致：{folder.relative_to(boundary).as_posix()} {numbers}", "IMAGE_NUMBERING"))
+    if assets_dirs:
+        try:
+            findings += _asset_findings(path, boundary, text, assets_dirs, include_siblings)
+            stats["assets_dirs_checked"] = len(assets_dirs)
+        except (ValueError, OSError, UnicodeError) as exc:
+            findings.append(Finding("error", None, f"资源目录/共享文档检查失败：{type(exc).__name__}", "ASSET_INPUT"))
+    _fingerprint(findings, path, digest)
+    if acknowledgements is not None:
+        apply_acknowledgements(findings, acknowledgements)
     return findings, stats
 
 
-def collect(targets: list[str]) -> list[Path]:
-    def noise(path: Path) -> bool:
-        # 点开头的目录（.git/.workbuddy 等）与依赖目录里的文档不是交付物
-        return any(part.startswith(".") or part in SKIP_DIRS for part in path.parts)
-
-    files: list[Path] = []
-    for raw in targets:
-        path = Path(raw).expanduser()
+def _collect_context(targets: list[str], root: Path | None = None) -> dict[Path, Path]:
+    files: dict[Path, Path] = {}
+    if root is not None:
+        root = Path(root).absolute()
+        root = safe_resolve(root, root)
+        if not root.is_dir():
+            raise ValueError("--root 必须是存在的目录")
+    for target in targets:
+        raw = Path(target).absolute()
+        boundary = root if root is not None else raw.parent
+        path = safe_resolve(raw, boundary)
         if path.is_dir():
-            files += sorted(
-                p for p in path.rglob("*.md")
-                if not noise(p.relative_to(path))
-            )
+            if is_reparse(raw):
+                raise ValueError("目录 target 不允许 symlink/junction")
+            boundary = root if root is not None else path
+            selected = [item for item in _walk(path, boundary) if item.suffix.lower() == ".md"]
         elif path.is_file():
-            files.append(path)
+            if raw.suffix.lower() != ".md" or path.suffix.lower() != ".md":
+                raise ValueError("输入文件扩展名必须为 .md")
+            selected = [path]
         else:
-            print(f"跳过（不存在）：{raw}")
+            raise ValueError("target 不存在或不是普通文件/目录")
+        for item in selected:
+            # 重复 target 的授权取较窄根，不因参数先后意外扩大授权。
+            if item not in files or boundary.is_relative_to(files[item]):
+                files[item] = boundary
     return files
 
 
-def main() -> int:
-    args = [a for a in sys.argv[1:] if a != "--strict"]
-    strict = "--strict" in sys.argv[1:]
-    files = collect(args)
-    if not files:
-        print("未找到可扫描的 Markdown 文件。用法：python3 scripts/scan_prd.py <PRD 文件或目录>")
+def collect(targets: list[str], *, root: Path | None = None) -> list[Path]:
+    """顺序稳定的真实路径去重；非法 target 抛 ValueError/OSError，不输出旁路文本。"""
+    return list(_collect_context(targets, root))
+
+
+class _Parser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        raise ValueError(message)
+
+
+def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    parser = _Parser(description=__doc__)
+    parser.add_argument("targets", nargs="+")
+    parser.add_argument("--strict", action="store_true", help="未确认 review 也失败")
+    parser.add_argument("--root", type=Path, help="明确授权交付根")
+    parser.add_argument("--assets-dir", type=Path, action="append", default=[], help="根内资源目录，可重复；须同时给 --root")
+    parser.add_argument("--ack", type=Path, help="人工确认 JSON，不自动生成")
+    parser.add_argument("--json", action="store_true", help="向标准输出打印 JSON")
+    records: list[dict[str, object]] = []
+    try:
+        args = parser.parse_args(argv)
+        if args.assets_dir and args.root is None:
+            raise ValueError("--assets-dir 须同时指定 --root，避免扩大或混淆授权根")
+        contexts = _collect_context(args.targets, args.root)
+        if not contexts:
+            raise ValueError("未找到可扫描的 Markdown 文件")
+        ack: object | None = None
+        if args.ack is not None:
+            raw = args.ack.absolute()
+            boundary = None
+            for allowed in set(contexts.values()):
+                try:
+                    safe_resolve(raw, allowed)
+                    boundary = allowed
+                    break
+                except ValueError:
+                    continue
+            if boundary is None:
+                raise ValueError("ack 必须位于本次已授权的扫描根内；不会扩大到确认文件的父目录")
+            ack = json.loads(read_text(raw, boundary))
+            _ack_entries(ack)
+        all_findings: list[Finding] = []
+        for path, boundary in contexts.items():
+            findings, stats = scan_file(path, root=boundary, assets_dirs=args.assets_dir)
+            records.append({"path": str(path), "root": str(boundary), "findings": findings, "stats": stats})
+            all_findings.extend(findings)
+        if ack is not None:
+            apply_acknowledgements(all_findings, ack)
+        errors = sum(item.level == "error" for item in all_findings)
+        pending = sum(item.level == "review" and not item.acknowledged for item in all_findings)
+        acknowledged = sum(item.acknowledged for item in all_findings)
+        exit_code = 2 if any(item.code in INPUT_CODES for item in all_findings) else int(bool(errors or (args.strict and pending)))
+        for record in records:
+            record["findings"] = [asdict(item) for item in record["findings"]]
+        result = {"version": 1, "files": records, "errors": errors, "pending_review": pending,
+                  "acknowledged": acknowledged, "exit_code": exit_code,
+                  "scope": {"external_urls": "未联网验证", "fragments": "仅提示人工确认", "orphan_images": "仅明确资源目录" if args.assets_dir else "未检查"}}
+        if args.json:
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+        else:
+            for record in records:
+                print(record["path"])
+                for item in record["findings"]:
+                    state = "已确认" if item["acknowledged"] else item["level"]
+                    print(f"  {state} [{item['code']}] 行 {item['line'] or '-'} {item['message']} ({item['fingerprint']})")
+                    if item["acknowledgement_reason"]:
+                        print(f"    确认理由：{item['acknowledgement_reason']}")
+            print(f"汇总：{errors} 个错误，{pending} 项未确认，{acknowledged} 项已确认；外链未联网验证，锚点未验证。")
+            if not args.assets_dir:
+                print("未指定资源目录：未检查孤儿图片。静态扫描不替代完整产品审校。")
+        return exit_code
+    except (ValueError, OSError, UnicodeError) as exc:
+        message = f"配置/输入错误：{exc}"
+        if "--json" in argv:
+            print(json.dumps({"version": 1, "files": [], "configuration_error": message, "exit_code": 2}, ensure_ascii=False))
+        else:
+            print(message)
         return 2
-
-    total_error = 0
-    total_review = 0
-    dirty_files: list[str] = []
-    print(f"扫描 {len(files)} 个文件\n")
-
-    for path in files:
-        findings, stats = scan_file(path)
-        errors = [f for f in findings if f.level == "error"]
-        reviews = [f for f in findings if f.level == "review"]
-        total_error += len(errors)
-        total_review += len(reviews)
-        if errors:
-            dirty_files.append(path.name)
-
-        print(f"{path}（图片 {stats['images']} 张、链接 {stats['links']} 条）")
-        if not findings:
-            print("  ✅ 未发现问题")
-        for finding in errors + reviews:
-            mark = "❌" if finding.level == "error" else "⚠️"
-            where = f"第 {finding.line} 行 " if finding.line else ""
-            print(f"  {mark} {where}{finding.message}")
-        print()
-
-    summary = f"汇总：{total_error} 个错误、{total_review} 项待人工确认"
-    if dirty_files:
-        shown = "、".join(dirty_files[:5]) + ("…" if len(dirty_files) > 5 else "")
-        summary += f"；有错误的文件 {len(dirty_files)} 个（{shown}）"
-    print(summary)
-    if len(files) > 20:
-        print(
-            "提示：一次扫到 20 个以上文件，说明给的是大目录。本脚本面向 PRD，"
-            "建议直接指向某个需求目录，避免把代码库、依赖包、技能文档一起扫进来。"
-        )
-    if total_error or (strict and total_review):
-        return 1
-    return 0
 
 
 if __name__ == "__main__":

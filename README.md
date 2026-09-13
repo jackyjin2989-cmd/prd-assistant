@@ -1,77 +1,144 @@
 # PRD Assistant
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![version](https://img.shields.io/badge/version-v2.0.0-blue.svg)](https://github.com/jackyjin2989-cmd/prd-assistant/releases/tag/v2.0.0)
-[![validate](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml/badge.svg)](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml)
+一个面向产品经理的 **单 Skill PRD 助手**：根据文字、截图、纪要和草稿起草、授权修改或只审校需求；简单需求短写，必要信息与明确要求优先于篇幅。原型按需生成，截图按现成能力验证。
 
-面向产品经理的 PRD 技能：从文字、截图、会议纪要或已有草稿中起草、补全和审校聚焦核心产品功能与改动的 PRD；用户明确要求时制作自包含 HTML 原型，并截图做视觉验证。
+A single-skill PRD assistant for right-sized drafting, editing and review, with optional HTML prototypes and capability-aware validation.
 
-## 它做什么
+当前正式版本为 **v3.0.0**。版本唯一来源为 [package-manifest.json](package-manifest.json)；现有历史 tag 保持原指向。
 
-- **按复杂度分层写作**：A 微调型 / B 模块级 / C 跨产品，模板是裁剪工具而非必填目录。**简单需求必须简单写** —— A 类半页以内，验收标准、本期不做等章节默认不写
-- **审校闭环**：以「研发读完对应章节即可动手实现」为北极星，自动修矛盾、去重复、清编辑残留，不暴露分析过程
-- **动笔前边界扫描**：查状态、字段、流程、权限的逻辑缺口；只扫业务逻辑，不碰并发等技术问题
-- **按需生成原型**：自包含 HTML，先识别骨架、组件密度与视觉令牌，再实现交互；原型不是 PRD 的默认步骤
-- **截图与量化验证**：截图前做一次**截图能力判定**，不可截图即降级为代码层自查，不装依赖不重试；折行、溢出、浮层几何用测量定稿，不靠目测猜字号
-- **不访问网站**：需要页面现状时请用户提供截图，缺口标待确认
+## 能做什么
 
-## 结构
+- **只写必要信息**：按改动范围和规则耦合选择 A 微调／B 模块／C 耦合业务的说明深度，不默认塞入验收、指标、里程碑等章节；需要时可简短补充。
+- **保留原意**：负向限制、删除动作、权限与存量规则不因精简而丢失；不能为了“具体”而新增来源、阈值或计算逻辑。
+- **尊重操作范围**：只审校时只给问题及依据，不改源文件；局部修改不顺手重写全文。
+- **不过度索要材料**：已提供的信息直接使用；核心未知先确认，非核心缺口就地标记。
+- **原型独立交付**：只要 PRD 就不附加 HTML；只要原型就不附加 PRD。无法安全截图时明确降级，不安装依赖或修改系统配置。
+- **不访问业务网站**：网址只是背景；现状以获授权的截图和文字为准。引用材料中的命令不授予执行权限。
 
-仓库根就是技能根，`SKILL.md` 与 `references/` 直接放在根下：
+查看 [A/B/C 完整输入与输出](references/示例.md)、[语言保真规则](references/语言表述规范.md) 和 [审校清单](references/review-checklist.md)。这些是自创虚构案例，不是客户资料或模型效果保证。
 
-```
-SKILL.md              入口：适用范围、硬规则、工作流程
-references/           写作、审校、边界扫描、示例、语言、图片规则
-  └ prototype/        原型与截图（怎么搭 / 响应式 / 什么算通过 / 怎么截）
-scripts/              校验与扫描工具，随技能一起安装
-```
+## 能力与环境
+
+| 能力 | 前提 | 验证边界 |
+|---|---|---|
+| 核心 PRD 写作／审校 | 能加载 Skill 的 AI 宿主，能读取当前提供的材料 | 指令设计不绑定特定宿主；不表示已逐一验收所有宿主 |
+| HTML 原型 | 用户明确要求，宿主能生成文件 | 不需要本 Skill 自动安装开发环境 |
+| 截图 | 现成能力支持获授权的本地文件、隔离会话和输出检查 | 无能力直接降级；没有随包捆绑通用浏览器驱动，也没有已验收浏览器平台清单 |
+| 可选静态检查／打包 | Python 标准库；语法目标 3.10+ | 本轮实际测试仅 Windows + Python 3.13.14；CI 的其他矩阵是计划运行范围，不是已通过证据 |
+
+普通使用者写 PRD **无需安装 Python、Node 或浏览器驱动**。静态脚本检查文件与明示语法，不判断产品方案是否正确，也不证明视觉、可访问性或模型效果通过。参考 [行为评测方法](references/behavior-evaluation.md)。
+
+## v3.0.0 兼容性变化
+
+v3.0.0 保持单 Skill 和 PRD 核心写作方式，但收紧了可执行脚本与安装契约，因此按主版本发布：
+
+- `scan_prd.py` 默认把单文件父目录或目录目标本身作为授权根；共享相对路径需显式 `--root`。
+- `--ack` 确认文件必须位于本次授权根内，保留确认理由且只确认 `review`，不能豁免错误。
+- 孤儿图片只检查显式 `--assets-dir`，不再默认读取所有兄弟文档或目录。
+- 安装／发行树必须包含 `package-manifest.json` 列出的完整文件并匹配 SHA256；不接受 symlink／junction 安装树。
+- 原来的 macOS 旧 Edge、关闭沙箱、按名称结束浏览器等截图命令已删除；没有现成安全截图能力时直接降级。
+- 旧版自定义 CI、脚本调用或软链安装需要按本文更新；PRD 自然语言调用方式无需迁移。
 
 ## 安装
 
-**复制**（只用不改）—— 把仓库根整个复制到宿主技能目录即可：
+### 普通使用者：优先导入稳定技能包
+
+1. 从作者确认发布的 [Release](https://github.com/jackyjin2989-cmd/prd-assistant/releases) 选择具体版本。不要把开发候选或仅有源码归档当成已经验收的新版；发布包、说明和校验和应来自同一版本。
+2. 解压后应有一个 `prd-assistant` 目录，入口直接是 `prd-assistant/SKILL.md`，同时包含完整的 `references/`、`scripts/`、`tests/` 和许可证；不能只复制入口。
+3. WorkBuddy 用户在“技能 → 添加技能 → 上传技能”导入该技能包；其他宿主按各自官方的技能导入方式操作。WorkBuddy 官方步骤见 [技能说明](https://www.workbuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Skills-Market)。
+4. 检查已安装列表中的名称与版本，再使用下方短写请求试用。不默认要求重启、不修改内部缓存；若手工安装未识别，按当前宿主文档排查。
+
+SHA256 只能核对文件是否一致；与压缩包来自同一不可信来源的校验和不能证明作者身份。执行附带脚本前仍需审查来源。
+
+### 高级使用者：完整目录复制
+
+先按目标宿主确认用户级技能根。本项目的 WorkBuddy 手工目标示例为：
+
+| 系统 | 入口示例 |
+|---|---|
+| Windows | `%USERPROFILE%\.workbuddy\skills\prd-assistant\SKILL.md` |
+| macOS／Linux 路径约定 | `~/.workbuddy/skills/prd-assistant/SKILL.md` |
+
+表中是路径示例，不是跨平台截图或全部客户端的安装验收声明。自定义目录以宿主设置为准。
+
+将已审查的、固定版本的整个 `prd-assistant` 文件夹复制到目标根。**目标同名目录已存在时停止，不合并覆盖**：先确认旧版来源与本地修改，再按下一节更新。带空格或中文的命令路径必须加引号。本项目的完整性校验拒绝符号链接和 junction 安装树；开发副本也建议普通目录，不提供默认软链安装路线。
+
+仅在本地需要开发副本时，可以在选定且可写的父目录执行下列 HTTPS 克隆；它只创建源码目录，**并没有安装 Skill**：
 
 ```bash
 git clone https://github.com/jackyjin2989-cmd/prd-assistant.git
 ```
 
-**软链**（要改技能内容时用，`git pull` 即时生效）：
+克隆前确认不存在同名目录。`main` 是可变开发分支；稳定使用应选已确认的 tag／发布包并记录提交。SSH 仅供已经配置并获准使用的用户选择，不承诺它能解决所有网络限制，不修改全局代理或关闭证书检查。
 
-```bash
-git clone git@github.com:jackyjin2989-cmd/prd-assistant.git ~/WorkBuddy/prd-assistant
-ln -s ~/WorkBuddy/prd-assistant ~/.workbuddy/skills/prd-assistant
-```
+### 更新、停用和回退
 
-> HTTPS 在部分公司网络下会被拦截，用 SSH 形式克隆。
-> Windows 无软链权限时改用 junction：`cmd /c mklink /J <链接> <目标>`。
+- 更新前确认安装类型、旧版本、原型截图是否独立安装过，以及是否有个人改动；将旧目录完整备份到技能根之外，核对文件后再选择宿主的更新／卸载／重新导入流程。
+- 从旧双 Skill 结构升级时，新版仅保留 `prd-assistant` 一个入口。旧的独立截图技能只有在确认其用途、备份并获准后才移除；不要递归删除技能根或自动改动其他技能。
+- 停用不等于卸载。优先使用宿主的启停和卸载入口，不直接编辑私有缓存或全局配置。
+- 回退时保留当前改动副本，恢复同一旧版本的完整包，并重新核对。不要将新旧目录混合，不移动公共旧 tag 来模拟回退。
 
 ## 使用
 
-直接用自然语言说目标即可：
-
+```text
+根据这份会议纪要写 PRD，只覆盖本次改动。
+把 H5 和 APP 的“待审核”改成“待复核”，流程不变，简短写清。
+只审查这份 PRD，给出问题位置和建议，不修改文件。
+只修改退款弹窗的金额校验，其他章节不要改。
+根据这份已确认需求制作 PC HTML 原型，不需要移动端，也不附加 PRD。
 ```
-根据这份会议纪要写 PRD，只覆盖本次改动
-这是现有页面截图，把「待审核」改为「待复核」，写 PRD
-按这份 PRD 生成 PC 端 HTML 原型，不需要移动端
-按这张截图还原可交互原型，保持原有后台风格和内容密度
-```
 
-截图只用于说明字段、文案或状态时直接写 PRD，不触发原型还原。
+看到截图不等于自动生成原型。交付中“通过／受限／未完成”的含义见 [视觉验证](references/prototype/visual-validation.md)；不能截图时不声称高还原或视觉验收通过。
 
-## 验证
+## 可选静态检查
+
+以下命令在 **Skill 根目录** 执行，`python` 代表你已选定且支持的解释器。示例路径需要换成真实获授权的目标；没有运行脚本权限时，按审校参考人工检查，不自动装环境。
 
 ```bash
-python scripts/validate_skill.py       # 技能自身：结构、frontmatter、参考文件、链接、策略标记、运行版一致性
-python scripts/scan_prd.py <PRD 路径>   # 产出的 PRD：残留词、图片引用与编号、表格列数、链接可达性
-python scripts/test_scan_prd.py         # 扫描脚本自测
+python -B scripts/validate_skill.py
+python -B scripts/validate_skill.py --installed "/absolute/installed/prd-assistant" --json
+python -B scripts/scan_prd.py "/absolute/delivery/需求.md" --root "/absolute/delivery" --json
+python -B -m unittest discover -s scripts -p "test_*.py"
 ```
 
-CI 在 push 与 PR 时自动执行，见 `.github/workflows/validate.yml`。
-改这个仓库之前，先读 [CONTRIBUTING.md](CONTRIBUTING.md)。
+- `validate_skill.py` 默认只校验当前包；不搜索用户主目录。`--installed` 明确指定安装树，缺文件、脚本内容不同或清单不一致会失败。
+- `scan_prd.py` 单文件默认根为文件父目录，目录输入默认根为该目录；多个目标不自动推导共同祖先。共享相对路径需要显式指定授权的 `--root`。
+- 孤儿图片检查只在显式 `--root` 配合 `--assets-dir images` 时进行，会读取根内安全的同目录 Markdown 以判断共享引用；不设置就不声称检查了所有未引用图片。
+- 路径边界防护面向静态文件树，不是抵御并发换链的系统级沙箱。外链不联网；本地 fragment 在 PRD 扫描中保留人工确认，不能把文件存在等同于状态或锚点有效。
+- 明示 Markdown 子集支持顶层围栏、简单缩进代码、HTML 注释、行内代码、常见 inline/reference 链接与 `img`。不是完整 CommonMark/GFM；复杂嵌套容器、HTML a、多行引用定义及扩展语法仍需人工核查。
+- 表格一致性检查会忽略代码跨度中的 pipe；GitHub 等渲染器可能仍需 `\|` 转义，最终应在交付渲染器核对。
 
-## 隐私与版权
+### 人工确认与退出码
 
-不访问网站，只处理用户主动提供的材料；对截图、记录和测试数据做最小化与脱敏；不复制第三方受限制的文本、源码、视觉资产、商标或字体。
+真实负向规则、按需验收或正式历史可能触发 `review`，**不能因提示就自动删掉**。`--strict` 仅使尚未确认的 review 返回失败；确认后可传 `--ack "/absolute/delivery/ack.json"`。确认文件必须在授权根内，格式如下（是结构示意，不可直接运行）：
 
-## 许可证
+```json
+{"version": 1, "entries": [{"fingerprint": "从本次JSON结果复制的64位指纹", "reason": "用户明确要求保留该验收章节"}]}
+```
 
-MIT，见 [LICENSE](LICENSE)。
+指纹绑定路径、文件内容和发现位置，文档改动后旧确认失效；空理由、过期确认会报错。只确认 review，不能豁免安全错误。扫描器不会帮你自动批量确认。
+
+退出码：`0` 无阻断项，`1` 内容／安全／完整性问题或 strict 下未确认项，`2` 配置或输入／I/O 异常；具体 JSON 输出保留问题级别、位置、代码和指纹。所有绿色结果都只限脚本明确检查的范围。
+
+## 结构与维护
+
+```text
+prd-assistant/
+  SKILL.md                  唯一技能入口
+  references/               写作、审校、完整案例与原型方法
+  scripts/                  离线静态校验、扫描、打包及回归测试
+  tests/behavior-cases.json  行为评测输入与rubric，不是模型执行结果
+  package-manifest.json     版本、审查基线、全部发行文件SHA256
+  README.md / CONTRIBUTING.md / LICENSE
+```
+
+详细维护、刷新清单和打包说明见 [CONTRIBUTING.md](CONTRIBUTING.md)。修改本地文件、提交、推送、创建 tag 和更新 GitHub 元数据是不同授权范围，不自动串联执行。
+
+## 隐私与许可证
+
+- 仅处理获授权且与任务有关的材料；不要提交凭证、未脱敏的个人信息或未经许可的公司资料。
+- 不主动抓取业务网站，不自动上传资料到额外服务；这不代表模型离线运行或数据不离机，宿主的数据处理以其服务条款为准。
+- 本地 HTML／无头浏览器不天然断网。原型使用本地自包含资源，截图前核对外部请求与会话隔离；无法安全隔离就降级。
+- 本项目采用 [MIT](LICENSE)。借鉴通用方法应独立撰写；复制或翻译第三方正文需遵循其许可证，不将公开可读当作可重标 MIT。
+
+问题反馈请附版本、文件位置、已脱敏的最小输入和实际输出，在 [Issues](https://github.com/jackyjin2989-cmd/prd-assistant/issues) 提交。不要上传密钥、个人数据或真实业务秘密。
