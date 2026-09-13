@@ -21,9 +21,6 @@ jobs:
     env:
       PYTHONUTF8: "1"
       PYTHONDONTWRITEBYTECODE: "1"
-      TMP: ${{ runner.temp }}
-      TEMP: ${{ runner.temp }}
-      TMPDIR: ${{ runner.temp }}
     steps:
       # Fixed refs checked during candidate preparation; updating requires review.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
