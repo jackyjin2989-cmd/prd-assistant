@@ -220,6 +220,30 @@ class ScanPrdTest(unittest.TestCase):
     def test_optional_section_is_review_not_semantic_proof(self) -> None:
         self.assertEqual([f.code for f in self.scan("t.md", "# 改动\n## 验收标准\n具体内容")], ["OPTIONAL_SECTION"])
 
+    def test_numbered_optional_sections(self) -> None:
+        for title in ("1. 验收标准", "2.1 测试用例", "3、 FAQ", "4.2. 成功判定"):
+            with self.subTest(title=title):
+                findings = self.scan("t.md", "# 改动\n## " + title)
+                self.assertEqual([(f.code, f.level, f.line) for f in findings],
+                                 [("OPTIONAL_SECTION", "review", 2)])
+
+    def test_numbered_business_heading_is_not_optional(self) -> None:
+        self.assertEqual(self.scan("t.md", "# 改动\n## 2.1 保存结果\n## 3. 验收标准字段展示"), [])
+
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "平台无 FIFO")
+    def test_fifo_inputs_return_without_blocking(self) -> None:
+        fifo = self.dir / "pipe.md"
+        os.mkfifo(fifo)
+        code = "import scan_prd,sys,pathlib; f,_=scan_prd.scan_file(pathlib.Path(sys.argv[1])); assert f[0].code=='INPUT_READ'"
+        result = subprocess.run([PY, "-B", "-c", code, str(fifo)], cwd=HERE,
+                                capture_output=True, timeout=5)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        doc = self.write("doc.md", "# 页面\n正文")
+        result = subprocess.run([PY, "-B", str(SCRIPT), str(doc), "--ack", str(fifo), "--json"],
+                                capture_output=True, text=True, timeout=5)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["exit_code"], 2)
+
     # ---------- 链接、图片与编码 ----------
     def test_angle_encoded_nested_and_titles_existing(self) -> None:
         self.write("with space.md", "# 说明")

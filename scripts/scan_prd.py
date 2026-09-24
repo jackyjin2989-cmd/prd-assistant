@@ -103,8 +103,9 @@ def scan_structure(text: str) -> list[Finding]:
                 findings.append(Finding("review", line_no,
                                         f"标题层级跳级：从 {'#' * previous_level} 跳到 {'#' * level}（{row.strip()[:30]}）", "HEADING_JUMP"))
             previous_level = level
-            if heading[2] in OPTIONAL_HEADINGS:
-                findings.append(Finding("review", line_no, f"可选章节需人工确认是否明确要求：{heading[2]}", "OPTIONAL_SECTION"))
+            title = re.sub(r"^\d+(?:\.\d+)*(?:[.、．])?\s+", "", heading[2])
+            if title in OPTIONAL_HEADINGS:
+                findings.append(Finding("review", line_no, f"可选章节需人工确认是否明确要求：{title}", "OPTIONAL_SECTION"))
         cells = _cells(row, original_rows[index])
         if table_columns is not None:
             if cells is None or not row.strip() or heading:
@@ -247,6 +248,8 @@ def scan_file(path: Path, *, root: Path | None = None, acknowledgements: dict[st
             findings.append(Finding("error", None, "输入文件必须为 Markdown（.md，大小写均可）", "INPUT_TYPE"))
             text = ""
         else:
+            if not path.is_file():
+                raise OSError("输入不是普通文件")
             data = safe_resolve(path, boundary).read_bytes()
             digest = hashlib.sha256(data).hexdigest()
             text = data.decode("utf-8-sig")

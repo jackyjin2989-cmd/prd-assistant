@@ -49,7 +49,10 @@ def safe_resolve(path: Path, root: Path) -> Path:
 
 def read_text(path: Path, root: Path) -> str:
     """根检查后读取 UTF-8/BOM 文本；I/O/解码异常由调用方结构化处理。"""
-    return safe_resolve(path, root).read_text(encoding="utf-8-sig")
+    resolved = safe_resolve(path, root)
+    if not resolved.is_file():
+        raise OSError("输入不是普通文件")
+    return resolved.read_text(encoding="utf-8-sig")
 
 
 def is_reparse(path: Path) -> bool:
