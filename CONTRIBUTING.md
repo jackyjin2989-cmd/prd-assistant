@@ -13,7 +13,7 @@
 | 原型结构和交互、目标端适配 | [原型生成](references/prototype/generation.md)、[响应式指南](references/prototype/responsive-guide.md) |
 | 截图能力、预算、降级、通过／受限／未完成 | [视觉验证](references/prototype/visual-validation.md) |
 | 已有能力的执行步骤、产物与测量记录 | [截图执行](references/prototype/screenshot-tooling.md) |
-| 每个需求的记忆、变更记录、恢复与交接模板 | [需求记忆与交接](references/需求记忆与交接.md) |
+| 持续性需求的记忆条件、变更记录、恢复与交接模板 | [需求记忆与交接](references/需求记忆与交接.md) |
 | 图片路径、复用、排布和图文冲突处理 | [图片指南](references/图片嵌入与截图指南.md) |
 | 自创输入输出、行为评测规范 | [示例](references/示例.md)、[行为评测](references/behavior-evaluation.md) |
 
@@ -37,7 +37,7 @@ python -B -m unittest discover -s scripts -p "test_*.py"
 
 ## 清单与安装验收
 
-[package-manifest.json](package-manifest.json) 是版本唯一来源，包含 `schema`、`skill`、`version`、`baseline_commit` 和 `files` 的 SHA256 映射；清单不列自身。`baseline_commit` 是修订参考来源，不代表候选已经提交或发布。本地迭代版本为 `3.1.0`，尚未发布远端；后续版本在范围和兼容性核对后更新。
+[package-manifest.json](package-manifest.json) 记录开发树的候选版本、审查基线和文件 SHA256；清单不列自身。`baseline_commit` 是修订参考来源，不代表候选已经提交或发布。正式发布状态以不可变的 tag、Release 说明和附件为准，不能根据开发分支中的版本字符串推定已经发布。
 
 - 基础发行资产在 `scripts/validate_skill.py` 的 `REQUIRED` 明确列出；新增、移除文件须同步代码清单、文档引用和测试。不能删掉脚本后只改 manifest 让它通过。
 - 不把 `.git`、编译缓存、输出图片、测试临时目录、依赖或凭证打包。刷新命令使用固定基础白名单；未知文件阻止刷新，避免顺带收集个人资料。
@@ -75,7 +75,7 @@ python -B scripts/package_skill.py --output "/absolute/output" --label candidate
 
 ## CI 与支持声明
 
-[校验工作流](.github/workflows/validate.yml) 配置了 Windows、Ubuntu、macOS 的 Python 3.10／3.13 矩阵、完整离线单测和文件验收；这仅是计划覆盖。只有实际运行成功后才能将对应平台写成已验证。目前仓库本轮本机测试为 Windows + Python 3.13.14，浏览器截图、Linux/macOS 运行及多宿主导入尚未完成。
+[校验工作流](.github/workflows/validate.yml) 配置了 Windows、Ubuntu、macOS 的 Python 3.10／3.13 矩阵、完整离线单测和文件验收。v3.1.0 发布提交的六个矩阵任务均已通过；后续提交和版本必须引用各自实际运行结果，不能继承旧版本的通过状态。浏览器截图、真实 GitLab 渲染和不同宿主导入仍需分别验证，CI 不能替代这些结论。
 
 工作流权限限定只读，检出不保留凭据；第三方 Actions 固定到审核过的提交，再通过有审查的更新保持维护。不能把 SHA 固定等同于依赖永远安全。PR 代码仍会执行，不给不可信分支传秘密，也不改用带提权语义的事件。
 

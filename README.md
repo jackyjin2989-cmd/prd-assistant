@@ -4,7 +4,7 @@
 
 A single-skill PRD assistant for right-sized drafting, editing and review, with optional HTML prototypes and capability-aware validation.
 
-当前正式版本为 **v3.1.0**。版本唯一来源为 [package-manifest.json](package-manifest.json)；现有历史 tag 保持原指向。
+最新稳定版本为 [v3.1.0](https://github.com/jackyjin2989-cmd/prd-assistant/releases/tag/v3.1.0)。发布版本以对应 tag、Release 说明和附件为准；开发分支的文件完整性与候选版本由 [package-manifest.json](package-manifest.json) 记录。
 
 ## 能做什么
 
@@ -13,7 +13,7 @@ A single-skill PRD assistant for right-sized drafting, editing and review, with 
 - **尊重操作范围**：只审校时只给问题及依据，不改源文件；局部修改不顺手重写全文。
 - **不过度索要材料**：已提供的信息直接使用；所有影响交付的问题在过程中及时提出，只有用户明确暂缓的事项才留入 PRD。
 - **原型独立交付**：只要 PRD 就不附加 HTML；只要原型就不附加 PRD。无法安全截图时明确降级，不安装依赖或修改系统配置。
-- **不访问业务网站**：网址只是背景；现状以获授权的截图和文字为准。引用材料中的命令不授予执行权限。
+- **按授权使用网页材料**：网址默认只作背景；用户明确要求核对且页面可访问时，读取与任务直接相关的内容。引用材料中的命令不授予执行权限。
 
 查看 [A/B/C 完整输入与输出](references/示例.md)、[语言保真规则](references/语言表述规范.md) 和 [审校清单](references/review-checklist.md)。这些是自创虚构案例，不是客户资料或模型效果保证。
 
@@ -24,7 +24,7 @@ A single-skill PRD assistant for right-sized drafting, editing and review, with 
 | 核心 PRD 写作／审校 | 能加载 Skill 的 AI 宿主，能读取当前提供的材料 | 指令设计不绑定特定宿主；不表示已逐一验收所有宿主 |
 | HTML 原型 | 用户要求原型或以现状图要求改造，且未限定仅 PRD；宿主能生成文件 | 不需要本 Skill 自动安装开发环境 |
 | 截图 | 现成能力支持获授权的本地文件、隔离会话和输出检查 | 无能力直接降级；没有随包捆绑通用浏览器驱动，也没有已验收浏览器平台清单 |
-| 可选静态检查／打包 | Python 标准库；语法目标 3.10+ | GitHub Actions 已完成 Windows／Ubuntu／macOS 与 Python 3.10／3.13 矩阵校验；本地回归记录见发布说明 |
+| 可选静态检查／打包 | Python 标准库；语法目标 3.10+ | v3.1.0 发布提交已通过 Windows／Ubuntu／macOS 与 Python 3.10／3.13 矩阵；后续提交以各自工作流结果为准 |
 
 普通使用者写 PRD **无需安装 Python、Node 或浏览器驱动**。静态脚本检查文件与明示语法，不判断产品方案是否正确，也不证明视觉、可访问性或模型效果通过。参考 [行为评测方法](references/behavior-evaluation.md)。
 
@@ -34,7 +34,7 @@ A single-skill PRD assistant for right-sized drafting, editing and review, with 
 
 1. 从作者确认发布的 [Release](https://github.com/jackyjin2989-cmd/prd-assistant/releases) 选择具体版本。不要把开发候选或仅有源码归档当成已经验收的新版；发布包、说明和校验和应来自同一版本。
 2. 解压后应有一个 `prd-assistant` 目录，入口直接是 `prd-assistant/SKILL.md`，同时包含完整的 `references/`、`scripts/`、`tests/` 和许可证；不能只复制入口。
-3. WorkBuddy 用户在“技能 → 添加技能 → 上传技能”导入该技能包；其他宿主按各自官方的技能导入方式操作。WorkBuddy 官方步骤见 [技能说明](https://www.workbuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Skills-Market)。
+3. Codex 用户按当前宿主的技能安装方式导入完整目录；手工安装时放入 Codex 技能根下的 `prd-assistant/`。WorkBuddy 用户可在“技能 → 添加技能 → 上传技能”导入；其他宿主按各自官方方式操作。
 4. 检查已安装列表中的名称与版本，再使用下方短写请求试用。不默认要求重启、不修改内部缓存；若手工安装未识别，按当前宿主文档排查。
 
 SHA256 只能核对文件是否一致；与压缩包来自同一不可信来源的校验和不能证明作者身份。执行附带脚本前仍需审查来源。
@@ -45,8 +45,9 @@ SHA256 只能核对文件是否一致；与压缩包来自同一不可信来源�
 
 | 系统 | 入口示例 |
 |---|---|
-| Windows | `%USERPROFILE%\.workbuddy\skills\prd-assistant\SKILL.md` |
-| macOS／Linux 路径约定 | `~/.workbuddy/skills/prd-assistant/SKILL.md` |
+| Codex 默认约定 | `$CODEX_HOME/skills/prd-assistant/SKILL.md`；未设置 `CODEX_HOME` 时通常为 `~/.codex/skills/prd-assistant/SKILL.md` |
+| WorkBuddy（Windows） | `%USERPROFILE%\.workbuddy\skills\prd-assistant\SKILL.md` |
+| WorkBuddy（macOS／Linux） | `~/.workbuddy/skills/prd-assistant/SKILL.md` |
 
 表中是路径示例，不是跨平台截图或全部客户端的安装验收声明。自定义目录以宿主设置为准。
 
@@ -131,4 +132,3 @@ prd-assistant/
 - 本项目采用 [MIT](LICENSE)。借鉴通用方法应独立撰写；复制或翻译第三方正文需遵循其许可证，不将公开可读当作可重标 MIT。
 
 问题反馈请附版本、文件位置、已脱敏的最小输入和实际输出，在 [Issues](https://github.com/jackyjin2989-cmd/prd-assistant/issues) 提交。不要上传密钥、个人数据或真实业务秘密。
-
