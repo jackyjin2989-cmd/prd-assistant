@@ -4,7 +4,7 @@
 
 A single-skill PRD assistant for right-sized drafting, editing and review, with optional HTML prototypes and capability-aware validation.
 
-本地迭代版本为 **v3.1.0**（基于 main 的 v3.0.0 工作副本；尚未发布远端 Release）。版本唯一来源为 [package-manifest.json](package-manifest.json)；现有历史 tag 保持原指向。
+当前正式版本为 **v3.1.0**。版本唯一来源为 [package-manifest.json](package-manifest.json)；现有历史 tag 保持原指向。
 
 ## 能做什么
 
@@ -24,11 +24,11 @@ A single-skill PRD assistant for right-sized drafting, editing and review, with 
 | 核心 PRD 写作／审校 | 能加载 Skill 的 AI 宿主，能读取当前提供的材料 | 指令设计不绑定特定宿主；不表示已逐一验收所有宿主 |
 | HTML 原型 | 用户要求原型或以现状图要求改造，且未限定仅 PRD；宿主能生成文件 | 不需要本 Skill 自动安装开发环境 |
 | 截图 | 现成能力支持获授权的本地文件、隔离会话和输出检查 | 无能力直接降级；没有随包捆绑通用浏览器驱动，也没有已验收浏览器平台清单 |
-| 可选静态检查／打包 | Python 标准库；语法目标 3.10+ | 历史基线记录为 Windows + Python 3.13.14；v3.1.0 本地回归在 macOS 26.6.2 arm64 + Python 3.9.6 运行 150 项，148 通过、2 跳过；不据此降低支持版本或声称其他矩阵通过 |
+| 可选静态检查／打包 | Python 标准库；语法目标 3.10+ | GitHub Actions 已完成 Windows／Ubuntu／macOS 与 Python 3.10／3.13 矩阵校验；本地回归记录见发布说明 |
 
 普通使用者写 PRD **无需安装 Python、Node 或浏览器驱动**。静态脚本检查文件与明示语法，不判断产品方案是否正确，也不证明视觉、可访问性或模型效果通过。参考 [行为评测方法](references/behavior-evaluation.md)。
 
-## v3.1.0 本地迭代
+## v3.1.0 版本更新
 
 1. 新写／全文整理的 PRD 默认使用章节与改动点序号，局部修改保留原编号。
 2. 现状截图作 reference；有页面改造意图时生成新原型，明确仅 PRD 时尊重交付范围。旧图只在用户要求现状展示／对照时嵌入。
@@ -36,7 +36,7 @@ A single-skill PRD assistant for right-sized drafting, editing and review, with 
 4. GitLab 多图使用 HTML 表格、像素宽度与换行图注，保持独立图片；宽度以源图及目标预览标定。
 5. 每个需求维护独立 `记忆.md`，保存原话、追加变更、当前有效要求和接手检查点，恢复任务先读。只读与限制写入场景按 [需求记忆与交接](references/需求记忆与交接.md) 降级。
 
-本次沿用现有脚本接口与安全边界，补充行为评测用例；静态校验不代表实际模型行为或 GitLab 实机验证通过。
+本版本沿用现有脚本接口与安全边界，补充行为评测用例；静态校验不代表实际模型行为或 GitLab 实机验证通过。完整变更和附件见 [v3.1.0 Release](https://github.com/jackyjin2989-cmd/prd-assistant/releases/tag/v3.1.0)。
 
 ## v3.0.0 兼容性变化
 
@@ -152,3 +152,4 @@ prd-assistant/
 - 本项目采用 [MIT](LICENSE)。借鉴通用方法应独立撰写；复制或翻译第三方正文需遵循其许可证，不将公开可读当作可重标 MIT。
 
 问题反馈请附版本、文件位置、已脱敏的最小输入和实际输出，在 [Issues](https://github.com/jackyjin2989-cmd/prd-assistant/issues) 提交。不要上传密钥、个人数据或真实业务秘密。
+
