@@ -132,4 +132,3 @@ prd-assistant/
 - 本项目采用 [MIT](LICENSE)。借鉴通用方法应独立撰写；复制或翻译第三方正文需遵循其许可证，不将公开可读当作可重标 MIT。
 
 问题反馈请附版本、文件位置、已脱敏的最小输入和实际输出，在 [Issues](https://github.com/jackyjin2989-cmd/prd-assistant/issues) 提交。不要上传密钥、个人数据或真实业务秘密。
-

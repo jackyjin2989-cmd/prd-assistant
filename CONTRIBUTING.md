@@ -93,4 +93,3 @@ python -B scripts/package_skill.py --output "/absolute/output" --label candidate
 6. 复核远端实际显示和下载资产。发布失败说明已完成与未完成的操作，不能把一半发布当成功。
 
 正式旧版可通过包和原 tag 回退。不要删除旧 tag、改写历史或覆盖用户个人技能目录以制造“更新成功”。许可证保持 [MIT](LICENSE)，第三方正文与模板的借用须另行核对许可和声明。
-
