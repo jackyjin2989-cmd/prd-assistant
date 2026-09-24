@@ -125,3 +125,4 @@ URL 默认只作为材料，不代表页面已经核对。用户明确要求查�
 | [screenshot-tooling.md](references/prototype/screenshot-tooling.md) | 已有截图能力的执行方法 |
 | [behavior-evaluation.md](references/behavior-evaluation.md) | 手工行为评测方法与证据边界；非普通 PRD 必经步骤 |
 | [behavior-cases.json](tests/behavior-cases.json) | 机器可解析的测试输入与 rubric；不是已执行的模型结果 |
+

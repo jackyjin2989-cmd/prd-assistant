@@ -4,7 +4,7 @@
 
 A single-skill PRD assistant for right-sized drafting, editing and review, with optional HTML prototypes and capability-aware validation.
 
-最新稳定版本为 [v3.1.0](https://github.com/jackyjin2989-cmd/prd-assistant/releases/tag/v3.1.0)。发布版本以对应 tag、Release 说明和附件为准；开发分支的文件完整性与候选版本由 [package-manifest.json](package-manifest.json) 记录。
+最新稳定版本为 [v3.1.1](https://github.com/jackyjin2989-cmd/prd-assistant/releases/tag/v3.1.1)。发布版本以对应 tag、Release 说明和附件为准；开发分支的文件完整性与候选版本由 [package-manifest.json](package-manifest.json) 记录。
 
 ## 能做什么
 
@@ -24,7 +24,7 @@ A single-skill PRD assistant for right-sized drafting, editing and review, with 
 | 核心 PRD 写作／审校 | 能加载 Skill 的 AI 宿主，能读取当前提供的材料 | 指令设计不绑定特定宿主；不表示已逐一验收所有宿主 |
 | HTML 原型 | 用户要求原型或以现状图要求改造，且未限定仅 PRD；宿主能生成文件 | 不需要本 Skill 自动安装开发环境 |
 | 截图 | 现成能力支持获授权的本地文件、隔离会话和输出检查 | 无能力直接降级；没有随包捆绑通用浏览器驱动，也没有已验收浏览器平台清单 |
-| 可选静态检查／打包 | Python 标准库；语法目标 3.10+ | v3.1.0 发布提交已通过 Windows／Ubuntu／macOS 与 Python 3.10／3.13 矩阵；后续提交以各自工作流结果为准 |
+| 可选静态检查／打包 | Python 标准库；语法目标 3.10+ | v3.1.1 发布提交已通过 Windows／Ubuntu／macOS 与 Python 3.10／3.13 矩阵；后续提交以各自工作流结果为准 |
 
 普通使用者写 PRD **无需安装 Python、Node 或浏览器驱动**。静态脚本检查文件与明示语法，不判断产品方案是否正确，也不证明视觉、可访问性或模型效果通过。参考 [行为评测方法](references/behavior-evaluation.md)。
 
@@ -132,3 +132,4 @@ prd-assistant/
 - 本项目采用 [MIT](LICENSE)。借鉴通用方法应独立撰写；复制或翻译第三方正文需遵循其许可证，不将公开可读当作可重标 MIT。
 
 问题反馈请附版本、文件位置、已脱敏的最小输入和实际输出，在 [Issues](https://github.com/jackyjin2989-cmd/prd-assistant/issues) 提交。不要上传密钥、个人数据或真实业务秘密。
+

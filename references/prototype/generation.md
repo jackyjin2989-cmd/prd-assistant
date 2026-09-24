@@ -83,3 +83,4 @@
 | [visual-validation.md](visual-validation.md) | 能力判定、比对判据、验证结论 |
 | [screenshot-tooling.md](screenshot-tooling.md) | 判定所需执行契约：隔离、就绪、时限、重试、测量与输出证据 |
 | [图片嵌入与截图指南.md](../图片嵌入与截图指南.md) | 配图范围、图文一致性、图片路径、复用与排布 |
+

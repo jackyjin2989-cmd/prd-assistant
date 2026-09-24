@@ -75,7 +75,7 @@ python -B scripts/package_skill.py --output "/absolute/output" --label candidate
 
 ## CI 与支持声明
 
-[校验工作流](.github/workflows/validate.yml) 配置了 Windows、Ubuntu、macOS 的 Python 3.10／3.13 矩阵、完整离线单测和文件验收。v3.1.0 发布提交的六个矩阵任务均已通过；后续提交和版本必须引用各自实际运行结果，不能继承旧版本的通过状态。浏览器截图、真实 GitLab 渲染和不同宿主导入仍需分别验证，CI 不能替代这些结论。
+[校验工作流](.github/workflows/validate.yml) 配置了 Windows、Ubuntu、macOS 的 Python 3.10／3.13 矩阵、完整离线单测和文件验收。每个提交和版本都必须引用自身的实际运行结果，不能继承旧版本的通过状态。浏览器截图、真实 GitLab 渲染和不同宿主导入仍需分别验证，CI 不能替代这些结论。
 
 工作流权限限定只读，检出不保留凭据；第三方 Actions 固定到审核过的提交，再通过有审查的更新保持维护。不能把 SHA 固定等同于依赖永远安全。PR 代码仍会执行，不给不可信分支传秘密，也不改用带提权语义的事件。
 
@@ -93,3 +93,4 @@ python -B scripts/package_skill.py --output "/absolute/output" --label candidate
 6. 复核远端实际显示和下载资产。发布失败说明已完成与未完成的操作，不能把一半发布当成功。
 
 正式旧版可通过包和原 tag 回退。不要删除旧 tag、改写历史或覆盖用户个人技能目录以制造“更新成功”。许可证保持 [MIT](LICENSE)，第三方正文与模板的借用须另行核对许可和声明。
+
