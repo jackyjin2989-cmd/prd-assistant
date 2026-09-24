@@ -40,6 +40,7 @@ REQUIRED = frozenset({
     "references/prototype/screenshot-tooling.md", "scripts/prd_syntax.py",
     "scripts/test_prd_syntax.py", "scripts/test_validate_skill.py", "scripts/package_skill.py",
     "tests/behavior-cases.json", "references/behavior-evaluation.md",
+    "references/需求记忆与交接.md",
 })
 # 排除项明确固定，不采用 .gitignore 或用户环境；先检查目录入口不是链接再跳过。
 EXCLUDED_DIRS = frozenset({".git", "__pycache__", ".pytest_cache", "artifacts", "screenshots",

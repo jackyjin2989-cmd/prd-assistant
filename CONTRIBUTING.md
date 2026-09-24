@@ -13,6 +13,7 @@
 | 原型结构和交互、目标端适配 | [原型生成](references/prototype/generation.md)、[响应式指南](references/prototype/responsive-guide.md) |
 | 截图能力、预算、降级、通过／受限／未完成 | [视觉验证](references/prototype/visual-validation.md) |
 | 已有能力的执行步骤、产物与测量记录 | [截图执行](references/prototype/screenshot-tooling.md) |
+| 每个需求的记忆、变更记录、恢复与交接模板 | [需求记忆与交接](references/需求记忆与交接.md) |
 | 图片路径、复用、排布和图文冲突处理 | [图片指南](references/图片嵌入与截图指南.md) |
 | 自创输入输出、行为评测规范 | [示例](references/示例.md)、[行为评测](references/behavior-evaluation.md) |
 
@@ -36,7 +37,7 @@ python -B -m unittest discover -s scripts -p "test_*.py"
 
 ## 清单与安装验收
 
-[package-manifest.json](package-manifest.json) 是版本唯一来源，包含 `schema`、`skill`、`version`、`baseline_commit` 和 `files` 的 SHA256 映射；清单不列自身。`baseline_commit` 是修订参考来源，不代表候选已经提交或发布。当前正式版本为 `3.0.0`；任何后续版本只在范围和兼容性重新确认后更新。
+[package-manifest.json](package-manifest.json) 是版本唯一来源，包含 `schema`、`skill`、`version`、`baseline_commit` 和 `files` 的 SHA256 映射；清单不列自身。`baseline_commit` 是修订参考来源，不代表候选已经提交或发布。本地迭代版本为 `3.1.0`，尚未发布远端；后续版本在范围和兼容性核对后更新。
 
 - 基础发行资产在 `scripts/validate_skill.py` 的 `REQUIRED` 明确列出；新增、移除文件须同步代码清单、文档引用和测试。不能删掉脚本后只改 manifest 让它通过。
 - 不把 `.git`、编译缓存、输出图片、测试临时目录、依赖或凭证打包。刷新命令使用固定基础白名单；未知文件阻止刷新，避免顺带收集个人资料。
