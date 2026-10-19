@@ -1,88 +1,115 @@
+English | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
+
 # PRD Assistant
 
-一个面向产品经理的 **单 Skill PRD 助手**：根据文字、截图、纪要和草稿起草、授权修改或只审校需求；简单需求短写，必要信息与明确要求优先于篇幅。原型按需生成，截图按现成能力验证。
+[![GitHub stars](https://img.shields.io/github/stars/jackyjin2989-cmd/prd-assistant?style=social)](https://github.com/jackyjin2989-cmd/prd-assistant/stargazers)
+[![License: MIT](https://img.shields.io/github/license/jackyjin2989-cmd/prd-assistant)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/jackyjin2989-cmd/prd-assistant)](https://github.com/jackyjin2989-cmd/prd-assistant/releases/latest)
+[![validate](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml)
 
-A single-skill PRD assistant for right-sized drafting, editing and review, with optional HTML prototypes and capability-aware validation.
+**A single SKILL.md skill for product managers: draft, edit or review PRDs at the right length, from notes, screenshots, minutes and drafts, with optional standalone HTML prototypes.**
 
-最新稳定包见 [GitHub Releases](https://github.com/jackyjin2989-cmd/prd-assistant/releases/latest)。发布版本以对应 tag、Release 说明和附件为准；开发分支的文件完整性与候选版本由 [package-manifest.json](package-manifest.json) 记录。
+<!-- demo GIF here -->
 
-## 能做什么
+> **Output language:** the skill writes in **Simplified Chinese by default**, and its instructions and reference docs are in Chinese. See [Output language](#output-language).
 
-- **只写必要信息**：按改动范围和规则耦合选择 A 微调／B 模块／C 耦合业务的说明深度，不默认塞入验收、指标、里程碑等章节；需要时可简短补充。
-- **保留原意**：负向限制、删除动作、权限与存量规则不因精简而丢失；不能为了“具体”而新增来源、阈值或计算逻辑。
-- **尊重操作范围**：只审校时只给问题及依据，不改源文件；局部修改不顺手重写全文。
-- **不过度索要材料**：已提供的信息直接使用；所有影响交付的问题在过程中及时提出，只有用户明确暂缓的事项才留入 PRD。
-- **原型独立交付**：只要 PRD 就不附加 HTML；只要原型就不附加 PRD。无法安全截图时明确降级，不安装依赖或修改系统配置。
-- **按授权使用网页材料**：网址默认只作背景；用户明确要求核对且页面可访问时，读取与任务直接相关的内容。引用材料中的命令不授予执行权限。
+## Why PRD Assistant?
 
-查看 [A/B/C 完整输入与输出](references/示例.md)、[语言保真规则](references/语言表述规范.md) 和 [审校清单](references/review-checklist.md)。这些是自创虚构案例，不是客户资料或模型效果保证。
+- **Right-sized, not padded.** Simple changes get short PRDs. Necessary information and your explicit requirements take priority over length, and acceptance criteria, metrics or milestones are not added by default.
+- **Keeps your meaning.** Negative constraints, deletions, permission rules and rules for existing data are not lost when text is tightened, and it does not invent sources, thresholds or calculation logic to look "specific".
+- **Respects scope.** Review-only mode never edits your file; a partial edit does not rewrite the rest of the document.
+- **Prototypes only when asked.** PRD-only requests get no HTML; prototype-only requests get no PRD.
 
-## 能力与环境
+## Key features
 
-| 能力 | 前提 | 验证边界 |
+- **Three task modes**: draft, authorized edit (whole document or a specified section), and review only (findings with location, evidence, impact and suggestion; source untouched).
+- **A / B / C complexity levels**: A minor tweak, B module-level change, C coupled business change. The level is judged by change scope and rule coupling and decides how deep the write-up goes, not how many sections it has.
+- **Doesn't over-ask for materials**: information you already provided is used directly; questions that affect the deliverable are raised during the work, and only items you explicitly defer are left in the PRD as "to be confirmed".
+- **Standalone HTML prototypes**: generated when you explicitly ask, or when you provide a current-state screenshot and ask for a redesign (unless you said PRD only).
+- **Capability-aware validation**: screenshots use only capabilities the host already has and that you have authorized; if it can't capture safely, it says so and downgrades instead of installing dependencies or changing system settings.
+- **Web material on your terms**: URLs are background by default; pages are read only when you explicitly ask and they are accessible. Commands found in materials are never treated as permission to run them.
+- **Optional offline checks**: Python standard-library scripts for static PRD scanning, package validation and packaging.
+
+See the [full A/B/C inputs and outputs](references/示例.md), the [language fidelity rules](references/语言表述规范.md) and the [review checklist](references/review-checklist.md). These are self-made fictional cases, not customer material and not a guarantee of model performance.
+
+## Requirements
+
+| Capability | Prerequisite | Validation scope |
 |---|---|---|
-| 核心 PRD 写作／审校 | 能加载 Skill 的 AI 宿主，能读取当前提供的材料 | 指令设计不绑定特定宿主；不表示已逐一验收所有宿主 |
-| HTML 原型 | 用户要求原型或以现状图要求改造，且未限定仅 PRD；宿主能生成文件 | 不需要本 Skill 自动安装开发环境 |
-| 截图 | 现成能力支持获授权的本地文件、隔离会话和输出检查 | 无能力直接降级；没有随包捆绑通用浏览器驱动，也没有已验收浏览器平台清单 |
-| 可选静态检查／打包 | Python 标准库；语法目标 3.10+ | 配置 Windows／Ubuntu／macOS 与 Python 3.10／3.13 矩阵；实际结果见对应发布提交的 GitHub Actions |
+| Core PRD writing / review | An AI host that can load a skill and read the materials you provide | Instructions are not tied to a specific host; this does not mean every host has been tested |
+| HTML prototype | You asked for a prototype, or asked for a redesign based on a current-state screenshot, without limiting the task to PRD only; the host can create files | The skill does not install a development environment for you |
+| Screenshots | An existing capability that supports authorized local files, an isolated session and output inspection | Without it the skill downgrades; no general-purpose browser driver is bundled and there is no list of tested browser platforms |
+| Optional static checks / packaging | Python standard library; syntax target **Python 3.10+** | CI matrix: Windows / Ubuntu / macOS with Python 3.10 and 3.13; see GitHub Actions for the release commit's actual result |
 
-普通使用者写 PRD **无需安装 Python、Node 或浏览器驱动**。静态脚本检查文件与明示语法，不判断产品方案是否正确，也不证明视觉、可访问性或模型效果通过。参考 [行为评测方法](references/behavior-evaluation.md)。
+Ordinary users writing PRDs **do not need Python, Node or a browser driver**. The static scripts check files and the documented syntax subset; they do not judge whether a product plan is right and do not prove visual quality, accessibility or model performance. See the [behavior evaluation method](references/behavior-evaluation.md).
 
-## 安装
+## Quick start
 
-### 普通使用者：优先导入稳定技能包
+### 1. Install the release package (recommended)
 
-1. 从作者确认发布的 [Release](https://github.com/jackyjin2989-cmd/prd-assistant/releases) 选择具体版本。不要把开发候选或仅有源码归档当成已经验收的新版；发布包、说明和校验和应来自同一版本。
-2. 解压后应有一个 `prd-assistant` 目录，入口直接是 `prd-assistant/SKILL.md`，同时包含完整的 `references/`、`scripts/`、`tests/` 和许可证；不能只复制入口。
-3. Codex 用户按当前宿主的技能安装方式导入完整目录；手工安装时放入 Codex 技能根下的 `prd-assistant/`。WorkBuddy 用户可在“技能 → 添加技能 → 上传技能”导入；其他宿主按各自官方方式操作。
-4. 检查已安装列表中的名称，并从包内 `package-manifest.json` 核对版本（宿主列表不一定显示版本），再使用下方短写请求试用。若手工安装未识别，按当前宿主文档排查。
+1. Pick a specific version from the [Releases](https://github.com/jackyjin2989-cmd/prd-assistant/releases) the author has published. Don't treat a development candidate or a bare source archive as a tested release; the package, notes and checksum should all come from the same version.
+2. After unzipping you should have one `prd-assistant` folder whose entry point is `prd-assistant/SKILL.md`, together with the full `references/`, `scripts/`, `tests/` and license. Don't copy only the entry file.
+3. Import the whole folder with your host's own skill installation flow:
+   - **Codex**: use the host's skill installation method, or install manually into `prd-assistant/` under the Codex skills root (see the table below).
+   - **WorkBuddy**: Skills → Add skill → Upload skill.
+   - **Other hosts that load SKILL.md skills**: follow that host's official method.
+4. Check the name in the installed list and confirm the version from `package-manifest.json` inside the package (the host list may not show versions). Then try one of the short requests under [Usage](#usage). If a manual install isn't recognized, check your host's documentation.
 
-SHA256 只能核对文件是否一致；与压缩包来自同一不可信来源的校验和不能证明作者身份。执行附带脚本前仍需审查来源。
+A SHA256 checksum only proves the files match; a checksum from the same untrusted source as the zip does not prove who wrote it. Review the source before running any bundled script.
 
-### 高级使用者：完整目录复制
+### 2. Manual copy (advanced)
 
-先按目标宿主确认用户级技能根。以下为手工安装路径示例：
+First confirm the user-level skills root of your host. Example paths for a manual install:
 
-| 系统 | 入口示例 |
+| Host | Entry path example |
 |---|---|
-| Codex 默认约定 | `$CODEX_HOME/skills/prd-assistant/SKILL.md`；未设置 `CODEX_HOME` 时通常为 `~/.codex/skills/prd-assistant/SKILL.md` |
-| WorkBuddy（Windows） | `%USERPROFILE%\.workbuddy\skills\prd-assistant\SKILL.md` |
-| WorkBuddy（macOS／Linux） | `~/.workbuddy/skills/prd-assistant/SKILL.md` |
+| Codex (default convention) | `$CODEX_HOME/skills/prd-assistant/SKILL.md`; if `CODEX_HOME` is not set, usually `~/.codex/skills/prd-assistant/SKILL.md` |
+| WorkBuddy (Windows) | `%USERPROFILE%\.workbuddy\skills\prd-assistant\SKILL.md` |
+| WorkBuddy (macOS / Linux) | `~/.workbuddy/skills/prd-assistant/SKILL.md` |
+| Claude Code (standard skills folder convention) | Personal: `~/.claude/skills/prd-assistant/SKILL.md`; project: `.claude/skills/prd-assistant/SKILL.md` |
 
-表中是路径示例，不是跨平台截图或全部客户端的安装验收声明。自定义目录以宿主设置为准。
+These are example paths, not a cross-platform screenshot test or an install acceptance claim for every client; the Claude Code row follows Claude Code's standard skills folder layout and has not been separately verified by this project. Custom directories follow your host's settings.
 
-将已审查的、固定版本的整个 `prd-assistant` 文件夹复制到目标根。**目标同名目录已存在时停止，不合并覆盖**：先确认旧版来源与本地修改，再按下一节更新。带空格或中文的命令路径必须加引号。本项目的完整性校验拒绝符号链接和 junction 安装树；开发副本也建议普通目录，不提供默认软链安装路线。
+Copy the whole reviewed, version-pinned `prd-assistant` folder into the target root. **If a folder with the same name already exists, stop; don't merge or overwrite.** First confirm where the old version came from and whether it has local changes, then follow the update steps below. Quote command paths that contain spaces or Chinese characters. This project's integrity check rejects symlinked and junction install trees; plain directories are recommended for development copies as well, and no symlink install route is provided.
 
-仅在本地需要开发副本时，可以在选定且可写的父目录执行下列 HTTPS 克隆；它只创建源码目录，**并没有安装 Skill**：
+Only if you need a local development copy, run this HTTPS clone in a chosen, writable parent folder. It only creates a source folder and **does not install the skill**:
 
 ```bash
 git clone https://github.com/jackyjin2989-cmd/prd-assistant.git
 ```
 
-克隆前确认不存在同名目录。`main` 是可变开发分支；稳定使用应选已确认的 tag／发布包并记录提交。SSH 仅供已经配置并获准使用的用户选择，不承诺它能解决所有网络限制，不修改全局代理或关闭证书检查。
+Make sure no folder with the same name exists before cloning. `main` is a moving development branch; for stable use pick a confirmed tag / release package and record the commit. SSH is only for users who have already set it up and are allowed to use it; it isn't promised to solve every network restriction, and you shouldn't change global proxies or disable certificate checks.
 
-### 更新、停用和回退
+### Update, disable and roll back
 
-- 更新前确认安装类型、旧版本、原型截图是否独立安装过，以及是否有个人改动；将旧目录完整备份到技能根之外，核对文件后再选择宿主的更新／卸载／重新导入流程。
-- 从旧双 Skill 结构升级时，新版仅保留 `prd-assistant` 一个入口。旧的独立截图技能只有在确认其用途、备份并获准后才移除；不要递归删除技能根或自动改动其他技能。
-- 停用不等于卸载。优先使用宿主的启停和卸载入口，不直接编辑私有缓存或全局配置。
-- 回退时保留当前改动副本，恢复同一旧版本的完整包，并重新核对。不要将新旧目录混合，不移动公共旧 tag 来模拟回退。
+- Before updating, confirm the install type, the old version, whether the prototype screenshot skill was installed separately, and whether you have personal changes. Back up the whole old folder outside the skills root, check the files, then use the host's update / uninstall / re-import flow.
+- When upgrading from the old two-skill layout, the new version keeps only the single `prd-assistant` entry. Remove the old standalone screenshot skill only after confirming its use, backing it up and getting approval; don't recursively delete the skills root or automatically change other skills.
+- Disabling is not uninstalling. Prefer the host's enable/disable and uninstall controls; don't edit private caches or global configuration directly.
+- To roll back, keep a copy of your current changes, restore the complete package of the same older version and re-check it. Don't mix old and new folders, and don't move public old tags to simulate a rollback.
 
-## 使用
+## Usage
 
-```text
-根据这份会议纪要写 PRD，只覆盖本次改动。
-把 H5 和 APP 的“待审核”改成“待复核”，流程不变，简短写清。
-只审查这份 PRD，给出问题位置和建议，不修改文件。
-只修改退款弹窗的金额校验，其他章节不要改。
-根据这份已确认需求制作 PC HTML 原型，不需要移动端，也不附加 PRD。
-```
+The skill picks the mode from your request. The examples are in Chinese because that is the skill's default working language; English glosses are given for reference.
 
-仅提供截图说明现状不自动生成原型；提供现状图并要求改造时会按目标需求生成新原型，用户明确“仅 PRD”时除外。交付中“通过／受限／未完成”的含义见 [视觉验证](references/prototype/visual-validation.md)；不能截图时不声称高还原或视觉验收通过。
+| Mode | Example request | What happens |
+|---|---|---|
+| Draft | `根据这份会议纪要写 PRD，只覆盖本次改动。` (Write a PRD from these meeting notes, covering only this change.) | Generates content from the materials provided; gaps are asked about, not guessed |
+| Authorized edit (short) | `把 H5 和 APP 的“待审核”改成“待复核”，流程不变，简短写清。` (Rename "pending review" to "pending re-check" in H5 and the app, flow unchanged, keep it short.) | An A-level change written briefly |
+| Authorized edit (section) | `只修改退款弹窗的金额校验，其他章节不要改。` (Only change the amount validation in the refund dialog; don't touch other sections.) | Edits only the target and directly affected references; out-of-scope issues are flagged, not rewritten |
+| Review only | `只审查这份 PRD，给出问题位置和建议，不修改文件。` (Only review this PRD; give issue locations and suggestions without editing the file.) | Conclusions with location, short evidence, impact and suggestion; the source file is untouched |
+| HTML prototype | `根据这份已确认需求制作 PC HTML 原型，不需要移动端，也不附加 PRD。` (Build a desktop HTML prototype from this confirmed requirement; no mobile, no PRD.) | A standalone HTML prototype, validated with whatever screenshot capability is available |
 
-## 可选静态检查
+Providing screenshots only to show the current state does not trigger a prototype. Providing a current-state screenshot **and** asking for a redesign produces a new prototype for the target requirement, unless you explicitly say PRD only. For what "passed / limited / not completed" mean in a delivery, see [visual validation](references/prototype/visual-validation.md); when screenshots aren't possible the skill does not claim high fidelity or visual acceptance.
 
-以下命令在 **Skill 根目录** 执行，`python` 代表你已选定且支持的解释器。示例路径需要换成真实获授权的目标；没有运行脚本权限时，按审校参考人工检查，不自动装环境。
+## Output language
+
+- The skill writes in **Simplified Chinese by default** (stated in `SKILL.md`), and its instructions, references and examples are written in Chinese.
+- `SKILL.md` does not document another output language as a supported mode. You can ask for one, but it has not been documented or evaluated by this project.
+- Multilingual UI copy inside a PRD is included only when you explicitly ask for it or an existing product mechanism requires it; translations you didn't provide are not presented as approved copy.
+
+## Optional static checks
+
+Run these from the **skill root**; `python` means an interpreter you have chosen and that is supported (3.10+). Replace the example paths with real, authorized targets. Without permission to run scripts, check manually with the review references; the skill does not set up an environment automatically.
 
 ```bash
 python -B scripts/validate_skill.py
@@ -91,44 +118,52 @@ python -B scripts/scan_prd.py "/absolute/delivery/需求.md" --root "/absolute/d
 python -B -m unittest discover -s scripts -p "test_*.py"
 ```
 
-- `validate_skill.py` 默认只校验当前包；不搜索用户主目录。`--installed` 明确指定安装树，缺文件、脚本内容不同或清单不一致会失败。
-- `scan_prd.py` 单文件默认根为文件父目录，目录输入默认根为该目录；多个目标不自动推导共同祖先。共享相对路径需要显式指定授权的 `--root`。
-- 孤儿图片检查只在显式 `--root` 配合 `--assets-dir images` 时进行，会读取根内安全的同目录 Markdown 以判断共享引用；不设置就不声称检查了所有未引用图片。
-- 路径边界防护面向静态文件树，不是抵御并发换链的系统级沙箱。外链不联网；本地 fragment 在 PRD 扫描中保留人工确认，不能把文件存在等同于状态或锚点有效。
-- 明示 Markdown 子集支持顶层围栏、简单缩进代码、HTML 注释、行内代码、常见 inline/reference 链接与 `img`。不是完整 CommonMark/GFM；复杂嵌套容器、HTML a、多行引用定义及扩展语法仍需人工核查。
-- 表格一致性检查会忽略代码跨度中的 pipe；GitHub 等渲染器可能仍需 `\|` 转义，最终应在交付渲染器核对。
+- `validate_skill.py` checks only the current package by default and does not search your home directory. `--installed` names an install tree explicitly; missing files, different script content or a mismatched manifest fail.
+- `scan_prd.py`: for a single file the default root is its parent folder; for a folder input, that folder. Multiple targets don't infer a common ancestor; shared relative paths need an explicit, authorized `--root`.
+- The orphan-image check runs only with an explicit `--root` plus `--assets-dir images`; it reads safe Markdown files in the same folder inside the root to detect shared references. Without these options, the scan does not claim to have checked every unreferenced image.
+- Path-boundary protection is for a static file tree, not a system-level sandbox against concurrent link swapping. External links are not fetched; local fragments in PRD scans are left for manual confirmation, and a file existing doesn't prove a state or anchor is valid.
+- The documented Markdown subset supports top-level fences, simple indented code, HTML comments, inline code, common inline/reference links and `img`. It is not full CommonMark/GFM; complex nested containers, HTML `a`, multi-line reference definitions and extension syntax still need manual checking.
+- The table consistency check ignores pipes inside code spans; renderers such as GitHub may still need `\|` escaping, so check in the final renderer.
 
-### 人工确认与退出码
+### Manual confirmation and exit codes
 
-真实负向规则、按需验收或正式历史可能触发 `review`，**不能因提示就自动删掉**。`--strict` 仅使尚未确认的 review 返回失败；确认后可传 `--ack "/absolute/delivery/ack.json"`。确认文件必须在授权根内，格式如下（是结构示意，不可直接运行）：
+Real negative rules, on-demand acceptance sections or formal history may trigger `review`; **don't delete them just because of the hint**. `--strict` only makes unconfirmed reviews fail; after confirming you can pass `--ack "/absolute/delivery/ack.json"`. The ack file must be inside the authorized root and look like this (a structure sketch, not runnable as-is):
 
 ```json
-{"version": 1, "entries": [{"fingerprint": "从本次JSON结果复制的64位指纹", "reason": "用户明确要求保留该验收章节"}]}
+{"version": 1, "entries": [{"fingerprint": "64-character fingerprint copied from this run's JSON result", "reason": "User explicitly asked to keep this acceptance section"}]}
 ```
 
-指纹绑定路径、文件内容和发现位置，文档改动后旧确认失效；空理由、过期确认会报错。只确认 review，不能豁免安全错误。扫描器不会帮你自动批量确认。
+A fingerprint is bound to the path, the file content and the finding location, so old confirmations expire when the document changes; empty reasons and expired confirmations are reported as errors. Only `review` items can be confirmed; security errors cannot be waived. The scanner never confirms in bulk for you.
 
-退出码：`0` 无阻断项，`1` 内容／安全／完整性问题或 strict 下未确认项，`2` 配置或输入／I/O 异常；具体 JSON 输出保留问题级别、位置、代码和指纹。所有绿色结果都只限脚本明确检查的范围。
+Exit codes: `0` no blocking items; `1` content / security / integrity problems, or unconfirmed items under `--strict`; `2` configuration or input / I/O errors. The JSON output keeps each issue's level, location, code and fingerprint. Every green result is limited to what the script explicitly checks.
 
-## 结构与维护
+## Repository structure
 
 ```text
 prd-assistant/
-  SKILL.md                  唯一技能入口
-  references/               写作、审校、完整案例与原型方法
-  scripts/                  离线静态校验、扫描、打包及回归测试
-  tests/behavior-cases.json  行为评测输入与rubric，不是模型执行结果
-  package-manifest.json     版本、审查基线、全部发行文件SHA256
-  README.md / CONTRIBUTING.md / LICENSE
+  SKILL.md                   the only skill entry point
+  references/                writing, review, full examples and prototype methods
+  scripts/                   offline static validation, scanning, packaging and regression tests
+  tests/behavior-cases.json  behavior evaluation inputs and rubric (not model run results)
+  package-manifest.json      version, review baseline and SHA256 of every release file
+  README.md / README.zh-CN.md / README.ja.md / CONTRIBUTING.md / LICENSE
 ```
 
-详细维护、刷新清单和打包说明见 [CONTRIBUTING.md](CONTRIBUTING.md)。按用户已授权的范围完成维护和发布；已有完整发布授权时，不重复逐项征求确认。本地修改授权本身不代表远端发布授权。
+The latest stable package is on [GitHub Releases](https://github.com/jackyjin2989-cmd/prd-assistant/releases/latest). A release is defined by its tag, release notes and attached files; for the development branch, file integrity and the candidate version are recorded in [package-manifest.json](package-manifest.json).
 
-## 隐私与许可证
+## Contributing
 
-- 仅处理获授权且与任务有关的材料；不要提交凭证、未脱敏的个人信息或未经许可的公司资料。
-- 不主动抓取业务网站，不自动上传资料到额外服务；这不代表模型离线运行或数据不离机，宿主的数据处理以其服务条款为准。
-- 本地 HTML／无头浏览器不天然断网。原型使用本地自包含资源，截图前核对外部请求与会话隔离；无法安全隔离就降级。
-- 本项目采用 [MIT](LICENSE)。借鉴通用方法应独立撰写；复制或翻译第三方正文需遵循其许可证，不将公开可读当作可重标 MIT。
+Maintenance, manifest refresh and packaging are described in [CONTRIBUTING.md](CONTRIBUTING.md) (in Chinese). Maintenance and releases are done within the scope the user has authorized; once full release authorization has been given, there's no need to ask again item by item. Authorization to change files locally does not authorize publishing to the remote.
 
-问题反馈请附版本、文件位置、已脱敏的最小输入和实际输出，在 [Issues](https://github.com/jackyjin2989-cmd/prd-assistant/issues) 提交。不要上传密钥、个人数据或真实业务秘密。
+When reporting a problem in [Issues](https://github.com/jackyjin2989-cmd/prd-assistant/issues), include the version, file location, a minimal redacted input and the actual output. Don't upload keys, personal data or real business secrets.
+
+## Privacy and license
+
+- Only process materials that are authorized and relevant to the task; don't submit credentials, unredacted personal information or company material without permission.
+- The skill doesn't proactively crawl business websites or upload materials to extra services. This doesn't mean the model runs offline or that data never leaves your machine; the host's data handling follows its own terms of service.
+- Local HTML and headless browsers aren't offline by nature. Prototypes use local, self-contained resources; before screenshots, external requests and session isolation are checked, and if safe isolation isn't possible the skill downgrades.
+- This project is licensed under [MIT](LICENSE). Borrowed general methods should be written independently; copying or translating third-party text must follow its license, and publicly readable content can't be relabeled as MIT.
+
+## ⭐ Like it?
+
+If this helps you, please give it a star ⭐ on [GitHub](https://github.com/jackyjin2989-cmd/prd-assistant). It helps other product managers find it.
