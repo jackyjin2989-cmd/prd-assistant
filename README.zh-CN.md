@@ -6,6 +6,7 @@
 [![License: MIT](https://img.shields.io/github/license/jackyjin2989-cmd/prd-assistant)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/jackyjin2989-cmd/prd-assistant)](https://github.com/jackyjin2989-cmd/prd-assistant/releases/latest)
 [![validate](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml)
+[![Agensi](https://img.shields.io/badge/Agensi-listed-2563eb)](https://www.agensi.io/skills/prd-assistant)
 
 **面向产品经理的单 Skill（SKILL.md）PRD 助手：根据文字、截图、纪要和草稿，按合适篇幅起草、修改或审校 PRD，并可按需生成独立 HTML 原型。**
 
@@ -54,6 +55,8 @@
    - **WorkBuddy**：在“技能 → 添加技能 → 上传技能”导入。
    - **其他支持 SKILL.md 的宿主**：按各自官方方式操作。
 4. 检查已安装列表中的名称，并从包内 `package-manifest.json` 核对版本（宿主列表不一定显示版本），再使用 [使用](#使用) 中的短写请求试用。若手工安装未识别，按当前宿主文档排查。
+
+本 Skill 也已在 [Agensi](https://www.agensi.io/skills/prd-assistant) 免费上架。
 
 SHA256 只能核对文件是否一致；与压缩包来自同一不可信来源的校验和不能证明作者身份。执行附带脚本前仍需审查来源。
 
