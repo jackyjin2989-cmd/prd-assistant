@@ -31,7 +31,7 @@ BASELINE_COMMIT = "e5ab216fd1caab7d3b76a9ffe6229e5771e5b4c7"
 # 基础资产不由 manifest 自报：删掉脚本再改 manifest 不能绕过此清单。
 REQUIRED = frozenset({
     ".gitattributes", ".github/workflows/validate.yml", ".gitignore",
-    "CONTRIBUTING.md", "LICENSE", "README.md", "SKILL.md",
+    "CONTRIBUTING.md", "LICENSE", "README.md", "README.zh-CN.md", "README.ja.md", "SKILL.md",
     "scripts/scan_prd.py", "scripts/test_scan_prd.py", "scripts/validate_skill.py",
     "references/input-intake.md", "references/写法指南.md", "references/边界扫描清单.md",
     "references/示例.md", "references/review-checklist.md", "references/图片嵌入与截图指南.md",
