@@ -6,6 +6,7 @@
 [![License: MIT](https://img.shields.io/github/license/jackyjin2989-cmd/prd-assistant)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/jackyjin2989-cmd/prd-assistant)](https://github.com/jackyjin2989-cmd/prd-assistant/releases/latest)
 [![validate](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml)
+[![Agensi](https://img.shields.io/badge/Agensi-listed-2563eb)](https://www.agensi.io/skills/prd-assistant)
 
 **プロダクトマネージャー向けの単一 SKILL.md スキル：テキスト、スクリーンショット、議事録、下書きから、適切な分量で PRD を起草・修正・レビューし、必要に応じて独立した HTML プロトタイプも作成します。**
 
@@ -54,6 +55,8 @@ PRD を書くだけの一般ユーザーは **Python、Node、ブラウザドラ
    - **WorkBuddy**：「スキル → スキルを追加 → スキルをアップロード」からインポートします。
    - **SKILL.md を読み込めるその他のホスト**：各ホストの公式手順に従ってください。
 4. インストール済み一覧で名前を確認し、パッケージ内の `package-manifest.json` でバージョンを確認します（ホストの一覧にバージョンが表示されるとは限りません）。その後 [使い方](#使い方) の短いリクエストで試してください。手動インストールが認識されない場合は、ホストのドキュメントを確認してください。
+
+このスキルは [Agensi](https://www.agensi.io/skills/prd-assistant) でも無料で入手できます。
 
 SHA256 はファイルが一致するかを確認するだけです。zip と同じ信頼できない入手元から来たチェックサムは作者を証明しません。同梱スクリプトを実行する前に入手元を確認してください。
 

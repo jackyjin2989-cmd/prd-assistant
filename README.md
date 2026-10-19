@@ -6,6 +6,7 @@ English | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 [![License: MIT](https://img.shields.io/github/license/jackyjin2989-cmd/prd-assistant)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/jackyjin2989-cmd/prd-assistant)](https://github.com/jackyjin2989-cmd/prd-assistant/releases/latest)
 [![validate](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/jackyjin2989-cmd/prd-assistant/actions/workflows/validate.yml)
+[![Agensi](https://img.shields.io/badge/Agensi-listed-2563eb)](https://www.agensi.io/skills/prd-assistant)
 
 **A single SKILL.md skill for product managers: draft, edit or review PRDs at the right length, from notes, screenshots, minutes and drafts, with optional standalone HTML prototypes.**
 
@@ -54,6 +55,8 @@ Ordinary users writing PRDs **do not need Python, Node or a browser driver**. Th
    - **WorkBuddy**: Skills → Add skill → Upload skill.
    - **Other hosts that load SKILL.md skills**: follow that host's official method.
 4. Check the name in the installed list and confirm the version from `package-manifest.json` inside the package (the host list may not show versions). Then try one of the short requests under [Usage](#usage). If a manual install isn't recognized, check your host's documentation.
+
+It is also available, free, on [Agensi](https://www.agensi.io/skills/prd-assistant).
 
 A SHA256 checksum only proves the files match; a checksum from the same untrusted source as the zip does not prove who wrote it. Review the source before running any bundled script.
 
